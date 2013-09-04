@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="0.9">
+<dict>
+
+    <key>NSPrincipalClass</key>
+    <string>NSApplication</string>
+
+    <key>CFBundleIconFile</key>
+    <string>icon.icns</string>
+
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <key>CFBundleGetInfoString</key>
+    <string>Created by Qt/QMake</string>
+
+    <key>CFBundleSignature</key>
+    <string>????</string>
+
+    <key>CFBundleExecutable</key>    
+    <string>edibit</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>nl.blommersit.edibit</string>
+
+    <key>NOTE</key>
+    <string>Copyright(c)2013 ReliableBits Software by Blommers IT.</string>
+
+    <!-- added for 'drop support?' -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeExtensions</key>
+            <array>
+                <string>xpm</string>
+            </array>
+            <key>CFBundleTypeIconFile</key>
+            <string>application.icns</string>
+
+            <key>CFBundleTypeMIMETypes</key>
+            <array>
+                <string>image/x-xpm</string>
+            </array>
+
+            <key>CFBundleTypeName</key>
+            <string>X PixMap File</string>
+
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+
+            <key>LSIsAppleDefaultForType</key>
+            <true/>
+
+        </dict>
+    </array>
+
+</dict>
+</plist>
+<!--
+
+
+ <!DOCTYPE plist PUBLIC
+        "-//Apple Computer//DTD PLIST 1.0//EN"
+        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+        <key>CFBundleIconFile</key>
+        <string>application.icns</string>
+        <key>CFBundleExecutable</key>
+        <string>appleevents</string>
+        <key>CFBundleIdentifier</key>
+        <string>com.trolltech.XpmViewer</string>
+        <key>CFBundleInfoDictionaryVersion</key>
+        <string>6.0</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleSignature</key>
+        <string>????</string>
+        <key>CFBundleVersion</key>
+        <string>1.0</string>
+        <key>CSResourcesFileMapped</key>
+        <true/>
+    </dict>
+    </plist>
+    
