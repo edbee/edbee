@@ -45,7 +45,7 @@ void Application::initApplication()
     #ifdef Q_OS_MAC
         appDataPath_ = applicationDirPath() + "/../Resources/";
     #else
-        appDataPath_ = qapp_->applicationDirPath();
+        appDataPath_ = qApp->applicationDirPath();
     #endif
 
     edbee::Edbee* tm = edbee::Edbee::instance();

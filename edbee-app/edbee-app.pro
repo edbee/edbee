@@ -9,7 +9,9 @@ TEMPLATE = app
 RC_FILE = main.rc
 ICON = images/icon.icns
 
-INCLUDEPATH += $$PWD/../config
+# This seems to be required for Windows
+INCLUDEPATH += $$PWD
+DEPENDPATH += $$PWD
 
 
 SOURCES +=\
