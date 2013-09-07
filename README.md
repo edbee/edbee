@@ -13,7 +13,7 @@ You can find the generated documentation at http://docs.edbee.net/
 Examples
 ========
 
-Using the component is pretty easy. You first must setup the edbee environment.
+Using the component is pretty easy. First you must setup the edbee environment.
 This process is required to make the library know the location of the setting
 files:
 
@@ -29,21 +29,21 @@ tm->setThemePath( "location/of/your/themes/" );
 // initialize the library
 tm->init();   
 
-// by registering an shutdown function on application exit you don't have to destroy the edbee
+// by registering a shutdown function on application exit you don't have to destroy the edbee
 // resources yourself. It will result in a clean shutdown
 tm->autoShutDownOnAppExit();
 ```
 
 
 
-After that your ready to go.
+After that you're ready to go.
 You can create a widget like this:
 
 ```
 edbee::TextEditorWidget* widget =  new edbee::TextEditorWidget();
 ```
 
-Of course it would also be nice to fill the edit with a file. you can use the included serializer for this.
+Of course it would also be nice to fill the editor with a file. you can use the included serializer for this.
 
 ```
 edbee::TextEditorWidget* widget =  new edbee::TextEditorWidget();
