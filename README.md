@@ -7,6 +7,8 @@ The main website for edbee is at http://edbee.net/
 
 You can find the generated documentation at http://docs.edbee.net/
 
+You can find the (highly experimental) binaries at https://bintray.com/gamecreature/edbee/edbee-app
+
 ![Screenshot of the example application](http://edbee.net/images/screenshot1.png)
 
 
