@@ -43,6 +43,11 @@
 		{ "keys": "Meta+shift+Down", "command": "add_caret_next_line" },
 		{ "keys": "Escape", "command": "sel_reset" },
 
+		// TODO: We need to build in support for alternative keymaps per platform
+		{ "keys": "Ctrl+Alt+Up", "command": "add_caret_prev_line" },
+		{ "keys": "Ctrl+Alt+Down", "command": "add_caret_next_line" },
+
+		
 		// line entry
 		{ "keys": "Enter", "command": "ins_newline" },
 		{ "keys": "Return", "command": "ins_newline" },
