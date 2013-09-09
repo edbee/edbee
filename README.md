@@ -13,10 +13,10 @@ You can find the (highly experimental) binaries at https://bintray.com/gamecreat
 
 
 Examples
-========
+--------
 
 Using the component is pretty easy. First you must setup the edbee environment.
-This process is required to make the library know the location of the setting
+This process is required to make the library know the location of the settings
 files:
 
 ```
@@ -60,10 +60,10 @@ if( !serializer.load( "your-filename.rb" ) ) {
 
 
 Known Issues and Missing Features
-=================================
+---------------------------------
 
 * The editor doesn't support word-wrapping. (yet)
-* It has issues with long lines. The cause of this is the nature of QTextLayout and the support of variable font sizes. In the future this can be fixed for monospaced font sizes.
+* It has issues with long lines. The cause of this is the nature of QTextLayout and the support of variable font sizes. In the future this can be fixed for monospaced fonts.
 * Optimalisations for better render support and background calculate/paint-ahead functionality
 * The example editor is still a very primitive editor. It needs a lot of improvements.
 
