@@ -40,8 +40,10 @@ OTHER_FILES += \
 	images/icon.png
 
 #QMAKE_INFO_PLIST    = Info.plist
+OTHER_FILES += ../edbee-data/config/*
 OTHER_FILES += ../edbee-data/keymaps/*
 OTHER_FILES += ../edbee-data/syntaxfiles/*
+OTHER_FILES += ../edbee-data/themes/*
 
 
 # in the clean step also delete the .app file

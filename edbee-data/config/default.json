@@ -1,8 +1,3 @@
-// Place your settings in the file "User/Preferences.sublime-settings", which
-// overrides the settings in here.
-//
-// Settings may also be placed in file type specific options files, for
-// example, in Packages/Python/Python.sublime-settings for python files.
 {
     "theme": "Monokai"
     , "caret_blink_rate": 700
@@ -13,7 +8,7 @@
     , "witespace_without_newline": "\t "
     , "extra_line_spacing": 0
     , "use_line_seperator": false
-    , "line_seperator_pen": " #aaaaaa; 1.5; dashed"
-    , "undo_group_per_space: true
+    , "line_seperator_pen": " #aaaaaa; 1.5; dashed" // we need to figure out a good format for this
+    , "undo_group_per_space": true
     , "show_caret_offset": true
 }
