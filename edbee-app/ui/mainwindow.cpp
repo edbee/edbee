@@ -5,6 +5,7 @@
 
 #include "mainwindow.h"
 
+#include <QApplication>
 #include <QComboBox>
 #include <QDropEvent>
 #include <QFile>
@@ -461,7 +462,12 @@ void MainWindow::createEditorAction(const QString& id, const char* text )
     actionMap_.insert(id,action);
 }
 
-/// creates an action
+/// creates an action and adds it to the actionmap
+/// @param id the unique identifier for this action
+/// @param text the text for this action
+/// @param keySequence the shortcut key sequence
+/// @param object the object that needs to recieve the events of the object
+/// @param slot the that should recieve the event
 void MainWindow::createAction(const QString& id, const QString& text, const QKeySequence& keySequence, QObject* object, const char* slot)
 {
     QAction* action = new QAction( text, 0);
@@ -501,8 +507,11 @@ void MainWindow::constructActions()
 }
 
 
+/// constructing the base user interface
 void MainWindow::constructUI()
 {
+    this->setWindowTitle( qApp->applicationDisplayName() );
+
     // statusbar
     QFont font = QFont(statusBar()->font().family(), 10 );
     statusBar()->setFont(font);

@@ -43,11 +43,15 @@ Application* Application::instance()
 void Application::initApplication()
 {
     #ifdef Q_OS_MAC
-        appDataPath_ = applicationDirPath() + "/../Resources/";
+        appDataPath_    = applicationDirPath() + "/../Resources/";
+
+
     #else
         appDataPath_ = qApp->applicationDirPath() + "/data/";
     #endif
+    userDataPath_   = QStandardPaths::writableLocation( QStandardPaths::DataLocation) + "/";
 
+    // configure the edbee component to use the default paths
     edbee::Edbee* tm = edbee::Edbee::instance();
     tm->setKeyMapPath( QString("%1%2").arg(appDataPath_).arg("keymaps"));
     tm->setGrammarPath(  QString("%1%2").arg(appDataPath_).arg("syntaxfiles") );
@@ -71,6 +75,32 @@ QFont Application::iconFont(int size) const
     return qtAwesome()->font(size);
 }
 
+/// Returns the application data path.
+/// This is the path to fixed application resources
+/// On Mac OS X this will be in the .app 'file'
+QString Application::appDataPath() const
+{
+    return appDataPath_;
+}
+
+/// Returns tha full application coniguration path
+QString Application::appConfigPath() const
+{
+    return QString("%1%2").arg(appDataPath()).arg("config");
+}
+
+/// Returns the user config data path. This is the data path where user specific
+/// settings are stored
+QString Application::userDataPath() const
+{
+    return userDataPath_;
+}
+
+/// Returns the full user configuration path
+QString Application::userConfigPath() const
+{
+    return QString("%1%2").arg(appDataPath()).arg("config");
+}
 
 
 

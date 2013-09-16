@@ -17,11 +17,11 @@
 int main(int argc, char* argv[])
 {
     Application qapp(argc, argv);
-    qapp.setApplicationName( "edbee - A sample application for the edbee component" );
+    qapp.setApplicationName( "edbee" );
     qapp.setApplicationVersion( "0.1");
     qapp.setOrganizationName( "edbee" );
     qapp.setOrganizationDomain( "edbee.net" );
-
+    qapp.setApplicationDisplayName("edbee - a sample application for the edbee component");
 
     // init the logging mechanism
     QsLogging::Logger& logger = QsLogging::Logger::instance();

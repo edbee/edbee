@@ -10,6 +10,7 @@
 
 class QtAwesome;
 
+/// The global application for the edbee test programm.
 class Application : public QApplication
 {
     Q_OBJECT
@@ -23,6 +24,11 @@ public:
     QtAwesome* qtAwesome() const;
     QFont iconFont( int size=12 ) const;
 
+    QString appDataPath() const;
+    QString appConfigPath() const;
+    QString userDataPath() const;
+    QString userConfigPath() const;
+
 signals:
     
 public slots:
@@ -33,5 +39,6 @@ protected:
 
 private:
     QString appDataPath_;       ///< The application data path
+    QString userDataPath_;      ///< The user configuration path
     QtAwesome* qtAwesome_;      ///< The QtAwesome IconFont instance
 };

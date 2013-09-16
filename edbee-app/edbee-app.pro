@@ -21,14 +21,16 @@ SOURCES +=\
     ui/filetreesidewidget.cpp \
     application.cpp \
     ui/gotowidget.cpp \
-    ui/findwidget.cpp
+    ui/findwidget.cpp \
+    models/edbeeconfig.cpp
 
 HEADERS  += \
     ui/mainwindow.h \
     ui/filetreesidewidget.h \
     application.h \
     ui/gotowidget.h \
-    ui/findwidget.h
+    ui/findwidget.h \
+    models/edbeeconfig.h
 
 
 RESOURCES += \
