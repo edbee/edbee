@@ -15,8 +15,9 @@ class QFileSystemModel;
 class QModelIndex;
 class QTreeView;
 
-
+class Application;
 class FileTreeSideWidget;
+
 namespace edbee {
 class TextEditorWidget;
 class TextEditorDocument;
@@ -27,8 +28,10 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    explicit MainWindow(Application* application, QWidget *parent = 0);
+    virtual ~MainWindow();
+
+    Application* application() const;
     
 public slots:
     void openDirOrFile( const QString& path );
@@ -75,6 +78,7 @@ protected:
 
 private:
 
+    edbee::TextEditorWidget* createEditorWidget();
     edbee::TextEditorWidget* editorForTab(int index=-1 );
 
     QAction* action( const QString& name );
@@ -92,6 +96,7 @@ private:
     void connectSignals();
 
 private:
+    Application* applicationRef_;                   ///< The reference to the application
     FileTreeSideWidget* fileTreeSideWidgetRef_;     ///< The side tree widget
     QTabWidget* tabWidgetRef_;                      ///< A reference to the tab widget
     QStatusBar* statusBarRef_;                      ///< The statusbar

@@ -23,7 +23,10 @@ SOURCES += \
 SOURCES += \
 	..\edbee-app\models\edbeeconfig.cpp
 
-#HEADERS += 
+
+
+HEADERS += \
+	models/edbeeconfigtest.h
 
 INCLUDEPATH += $$PWD/../edbee-app
 
@@ -45,6 +48,3 @@ DEPENDPATH += $$PWD/../edbee-lib
 win32:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../edbee-lib/release/edbee-lib.lib
 else:win32:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../edbee-lib/debug/edbee-lib.lib
 else:unix:!symbian: PRE_TARGETDEPS += $$OUT_PWD/../edbee-lib/libedbee-lib.a
-
-HEADERS += \
-    models/edbeeconfigtest.h

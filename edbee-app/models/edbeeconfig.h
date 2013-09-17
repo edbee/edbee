@@ -9,6 +9,7 @@
 
 namespace edbee {
     class CascadingQVariantMap;
+    class TextEditorConfig;
 }
 
 
@@ -20,13 +21,21 @@ public:
     explicit EdbeeConfig();
     virtual ~EdbeeConfig();
 
-    void addFile( const QString& fileName );
+    void addFile( const QString& fileName, bool createIfNotExists=false );
 
-    edbee::CascadingQVariantMap *configMap();
+    bool loadConfig();
+    void fillEditorConfig( edbee::TextEditorConfig* config ) const;
+
+    edbee::CascadingQVariantMap* configMap() const;
+
+    int fileCount() const;
+    QString file( int idx ) const;
+    QString loadMessageForFile( int idx ) const;
 
 private:
 
-    QStringList configFileList_;                    ///< The configuration file names
-    edbee::CascadingQVariantMap* configMap_;        ///< The build configmap
+    QStringList configFileList_;                           ///< The configuration file names
+    QList<edbee::CascadingQVariantMap*> configMapList_;    ///< The list of config-maps (internally these maps list to eachother)
+    QStringList loadMessageList_;                          ///< A list with parse results
 
 };

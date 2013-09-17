@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     qapp.initApplication();
 
     // show the main window
-    MainWindow mainWindow;
+    MainWindow mainWindow( &qapp );
     mainWindow.show();
     return qapp.exec();
 }

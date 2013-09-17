@@ -35,17 +35,20 @@
 #include "edbee/views/components/texteditorcomponent.h"
 #include "edbee/views/textrenderer.h"
 
+#include "application.h"
 #include "filetreesidewidget.h"
 #include "findwidget.h"
 #include "gotowidget.h"
+#include "models/edbeeconfig.h"
 
 #include "debug.h"
 
 
 static const int FileSizeWarning = 1024*1024*20;  // Larger then 20 MB give a warning!
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(Application* application, QWidget* parent)
     : QMainWindow(parent)
+    , applicationRef_(application)
     , fileTreeSideWidgetRef_(0)
     , tabWidgetRef_(0)
     , statusBarRef_(0)
@@ -64,6 +67,15 @@ MainWindow::~MainWindow()
     qDeleteAll(actionMap_);
 }
 
+/// Returns the reference to the application
+Application *MainWindow::application() const
+{
+    return applicationRef_;
+}
+
+/// opens the given directory or the given file. Depending on the type it will open
+/// a file in an editor window or it will open the directory in the sidebar
+/// @param path the path to open
 void MainWindow::openDirOrFile(const QString& path)
 {
     QFileInfo fileInfo(path);
@@ -77,6 +89,7 @@ void MainWindow::openDirOrFile(const QString& path)
     }
 }
 
+/// Opens the given dir in the side-tree window
 void MainWindow::openDir(const QString& path)
 {
     QFileInfo fileInfo(path);
@@ -90,6 +103,7 @@ void MainWindow::openDir(const QString& path)
 }
 
 
+/// Opens the given file in the editor window
 void MainWindow::openFile(const QString& fileName)
 {
     QFileInfo fileInfo(fileName);
@@ -116,9 +130,8 @@ void MainWindow::openFile(const QString& fileName)
     // open the file
     QFile file(fileName);
 
-    // create the widget
-    edbee::TextEditorWidget* widget = new edbee::TextEditorWidget();
-
+    // create the widget and serialize the file
+    edbee::TextEditorWidget* widget = createEditorWidget();
     edbee::TextDocumentSerializer serializer( widget->textDocument() );
     if( !serializer.load( &file ) ) {
         QMessageBox::warning(this, tr("Error opening file"), tr("Error opening file:\n%1").arg(serializer.errorString()) );
@@ -136,9 +149,11 @@ void MainWindow::openFile()
 
 void MainWindow::newFile()
 {
-    addEditorTab( new edbee::TextEditorWidget(), "" );
+    addEditorTab( createEditorWidget(), "" );
 }
 
+
+/// Adds an editor tab
 void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fileName )
 {
     QFileInfo info( fileName );
@@ -146,6 +161,7 @@ void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fi
 
     // initialize the layout
 
+// YUCK we must move this to the settings!
 /// TODO, helaas werkt het font nog niet zo goed als ik had gehoopt
 //QFont font("Monaco");
 QFont font("Bitstream Vera Sans Mono",12);
@@ -224,6 +240,7 @@ bool MainWindow::saveFile()
     return true;
 }
 
+/// Saves the file as a given name
 bool MainWindow::saveFileAs()
 {
     edbee::TextEditorWidget* widget = editorForTab();
@@ -315,6 +332,9 @@ void MainWindow::lineEndingChanged()
     }
 }
 
+
+/// This slot is called if the grammar is changed
+/// Here we forward the selected grammar to the textdocument of the editor
 void MainWindow::grammarChanged()
 {
     edbee::TextEditorWidget* widget = editorForTab();
@@ -339,6 +359,7 @@ void MainWindow::editorActionTrigged()
      }
 }
 
+/// this method updates the action states for the current editor state.
 void MainWindow::updateStateEditorActions()
 {
     edbee::TextEditorWidget* widget = editorForTab();
@@ -432,6 +453,16 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
     }
 }
 
+
+/// This method simply creates new editor. Applying all settings
+edbee::TextEditorWidget* MainWindow::createEditorWidget()
+{
+    edbee::TextEditorWidget* result = new edbee::TextEditorWidget();
+    application()->config()->fillEditorConfig( result->config() );
+    result->controller()->updateAfterConfigChange();
+    return result;
+}
+
 /// Returns the documetn at the given tab
 edbee::TextEditorWidget* MainWindow::editorForTab(int index)
 {
@@ -451,6 +482,7 @@ QAction *MainWindow::action(const QString& name)
 
 //==[ construction ]===============================================================================
 
+
 /// creates a text-editor action
 void MainWindow::createEditorAction(const QString& id, const char* text )
 {
@@ -461,6 +493,7 @@ void MainWindow::createEditorAction(const QString& id, const char* text )
     connect( action, SIGNAL(triggered()), SLOT(editorActionTrigged()) );
     actionMap_.insert(id,action);
 }
+
 
 /// creates an action and adds it to the actionmap
 /// @param id the unique identifier for this action

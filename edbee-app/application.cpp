@@ -5,16 +5,17 @@
 
 #include "application.h"
 
-#include <QtCore>
-#include <QtGui>
-#include <QFileOpenEvent>
 #include <QAbstractNativeEventFilter>
-
+#include <QDir>
+#include <QFileOpenEvent>
 #include <QMenu>
+#include <QMessageBox>
+#include <QStandardPaths>
 
 #include "edbee/io/tmlanguageparser.h"
 #include "edbee/edbee.h"
 #include "edbee/views/texttheme.h"
+#include "models/edbeeconfig.h"
 #include "QtAwesome.h"
 
 #include "debug.h"
@@ -24,15 +25,19 @@ static Application* inst;
 Application::Application(int& argc, char** argv )
     : QApplication( argc, argv )
     , qtAwesome_(0)
+    , config_(0)
 {
     inst = this;
+    config_ = new EdbeeConfig();
 }
 
 Application::~Application()
 {
+    delete config_;
     delete qtAwesome_;
 }
 
+/// returns the application instance
 Application* Application::instance()
 {
     return inst;
@@ -42,6 +47,7 @@ Application* Application::instance()
 /// Initializes the application
 void Application::initApplication()
 {
+    // Initialize the application paths
     #ifdef Q_OS_MAC
         appDataPath_    = applicationDirPath() + "/../Resources/";
 
@@ -59,9 +65,38 @@ void Application::initApplication()
     tm->init();   
     tm->autoShutDownOnAppExit();
 
+    // make sure the user config path exists
+//    QDir dir( userConfigPath() );
+    QDir dir;
+    dir.mkpath( userConfigPath() );
 
-    qtAwesome_ = new QtAwesome( qApp );
+    // add the configuration paths to the edbeeconfig
+    config()->addFile( QString("%1%2").arg(appConfigPath()).arg("default.json") );
+    config()->addFile( QString("%1%2").arg(userConfigPath()).arg("default.json"), true );
+
+
+    // load the configuration
+    if( !config()->loadConfig() ) {
+
+        /// build a nice error message
+        QString messages;
+        for( int i=0, cnt=config()->fileCount(); i<cnt; ++i ) {
+            QString msg = config()->loadMessageForFile(i);
+            if( !msg.isEmpty() ) {
+                messages.append( tr("- %1: %2\n").arg(config()->file(i)).arg(msg) );
+            }
+        }
+        // and show it
+        if( !messages.isEmpty() ) {
+            QString title = tr("Error loading configuration file(s)");
+            QMessageBox::warning(0, title,QString("%1\n%2").arg(title).arg(messages) );
+        }
+    }
+
+    // make qtawesome
+    qtAwesome_ = new QtAwesome( this);
     qtAwesome_->initFontAwesome();
+
 }
 
 QtAwesome *Application::qtAwesome() const
@@ -86,7 +121,7 @@ QString Application::appDataPath() const
 /// Returns tha full application coniguration path
 QString Application::appConfigPath() const
 {
-    return QString("%1%2").arg(appDataPath()).arg("config");
+    return QString("%1%2/").arg(appDataPath()).arg("config");
 }
 
 /// Returns the user config data path. This is the data path where user specific
@@ -99,9 +134,15 @@ QString Application::userDataPath() const
 /// Returns the full user configuration path
 QString Application::userConfigPath() const
 {
-    return QString("%1%2").arg(appDataPath()).arg("config");
+    return QString("%1%2/").arg(userDataPath()).arg("config");
 }
 
+
+/// Returns the edbee configuration
+EdbeeConfig* Application::config() const
+{
+    return config_;
+}
 
 
 bool Application::event(QEvent* event)

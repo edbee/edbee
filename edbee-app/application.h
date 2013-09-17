@@ -8,9 +8,10 @@
 #include <QApplication>
 #include <QFont>
 
+class EdbeeConfig;
 class QtAwesome;
 
-/// The global application for the edbee test programm.
+/// The global application for the edbee editor
 class Application : public QApplication
 {
     Q_OBJECT
@@ -29,16 +30,16 @@ public:
     QString userDataPath() const;
     QString userConfigPath() const;
 
-signals:
-    
-public slots:
+    EdbeeConfig* config() const;
 
 protected:
     bool event(QEvent* event);
     bool eventFilter(QObject *obj, QEvent *ev);
 
 private:
-    QString appDataPath_;       ///< The application data path
-    QString userDataPath_;      ///< The user configuration path
-    QtAwesome* qtAwesome_;      ///< The QtAwesome IconFont instance
+    QString appDataPath_;           ///< The application data path
+    QString userDataPath_;          ///< The user configuration path
+    QtAwesome* qtAwesome_;          ///< The QtAwesome IconFont instance
+
+    EdbeeConfig* config_;           ///< The main edbee configuration file
 };
