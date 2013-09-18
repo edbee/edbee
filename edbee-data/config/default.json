@@ -3,6 +3,8 @@
     , "caret_width": 2
     , "char_groups": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
     , "extra_line_spacing": 0
+    , "font": "Monospace"
+    , "font_size": 12
     , "indent_size": 4
 
 //    , "line_seperator_pen": " #aaaaaa; 1.5; dashed" // we need to figure out a good format for this

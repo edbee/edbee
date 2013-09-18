@@ -10,6 +10,7 @@
 namespace edbee {
     class CascadingQVariantMap;
     class TextEditorConfig;
+    class TextEditorWidget;
 }
 
 
@@ -25,6 +26,7 @@ public:
 
     bool loadConfig();
     void fillEditorConfig( edbee::TextEditorConfig* config ) const;
+    void applyToWidget( edbee::TextEditorWidget* widget ) const;
 
     edbee::CascadingQVariantMap* configMap() const;
 

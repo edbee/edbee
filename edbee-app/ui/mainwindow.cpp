@@ -159,24 +159,6 @@ void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fi
     QFileInfo info( fileName );
 
 
-    // initialize the layout
-
-// YUCK we must move this to the settings!
-/// TODO, helaas werkt het font nog niet zo goed als ik had gehoopt
-//QFont font("Monaco");
-QFont font("Bitstream Vera Sans Mono",12);
-//font.setStyleHint(QFont::TypeWriter);
-editor->setFont( font );
-//editor->viewport()->setFont(font);
-//editor->controller()->textRenderer()->reset();  // reset the layout
-//---
-
-//QFont font("Apple Symbols",20);
-//editor->setFont( font );
-//editor->textEditorComponent()->setFont(font);
-//editor->controller()->textRenderer()->reset();  // reset the layout
-
-
     // set the state to 'persisted'
     editor->textDocument()->setPersisted();
     editor->setProperty("file",fileName);
@@ -458,8 +440,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 edbee::TextEditorWidget* MainWindow::createEditorWidget()
 {
     edbee::TextEditorWidget* result = new edbee::TextEditorWidget();
-    application()->config()->fillEditorConfig( result->config() );
-    result->controller()->updateAfterConfigChange();
+    application()->config()->applyToWidget( result );
     return result;
 }
 

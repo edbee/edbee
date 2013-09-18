@@ -8,6 +8,8 @@
 #include "edbee/io/jsonparser.h"
 #include "edbee/models/texteditorconfig.h"
 #include "edbee/util/cascadingqvariantmap.h"
+#include "edbee/texteditorcontroller.h"
+#include "edbee/texteditorwidget.h"
 
 #include "debug.h"
 
@@ -78,9 +80,16 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->setUndoGroupPerSpace( map->boolValue("undo_group_per_space",true) );
     config->setUseLineSeparator( map->boolValue( "use_line_separator", false) );
     config->setUseTabChar( map->boolValue( "use_tab", true ));
+    QFont font( map->stringValue("font","Monospace"), map->intValue("font_size",12) );
+    config->setFont(font);
 }
 
-
+/// Applies the current config to the given widget
+void EdbeeConfig::applyToWidget(edbee::TextEditorWidget* widget) const
+{
+    fillEditorConfig( widget->config() );
+    widget->controller()->updateAfterConfigChange();
+}
 
 
 /// returns the qvariant map
