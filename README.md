@@ -58,7 +58,6 @@ if( !serializer.load( "your-filename.rb" ) ) {
 ```
 
 
-
 Known Issues and Missing Features
 ---------------------------------
 
@@ -67,6 +66,25 @@ Known Issues and Missing Features
 * Optimalisations for better render support and background calculate/paint-ahead functionality
 * The example editor is still a very primitive editor. It needs a lot of improvements.
 
+
+Contributing
+------------
+
+You can contribute via github
+- Fork it
+- Create your feature branch (git checkout -b my-new-feature)
+- Commit your changes (git commit -am 'Added some feature')
+- Push to the branch (git push origin my-new-feature)
+- Create new Pull Request
+
+Of course you can also contribute by contacting me via twitter or drop me al message 
+via http://gamecreatures.com/
+
+Issues?
+-------
+
+Though we have our own issue-tracker at ( http://issues.edbee.net/ ), you can report your problems 
+via the github issue tracker or send me a message via twitter @gamecreature
 
 
 
