@@ -69,6 +69,7 @@ bool EdbeeConfig::loadConfig()
 void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
 {
     const edbee::CascadingQVariantMap* map = configMap();
+    config->beginChanges();
     config->setCaretBlinkRate( map->intValue("caret_blink_rate",700) );
     config->setCaretWidth( map->intValue("caret_width",2) );
     config->setCharGroups( QStringList(map->stringValue("char_groups")) );          /// this should use character groups
@@ -82,13 +83,13 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->setUseTabChar( map->boolValue( "use_tab", true ));
     QFont font( map->stringValue("font","Monospace"), map->intValue("font_size",12) );
     config->setFont(font);
+    config->endChanges();
 }
 
 /// Applies the current config to the given widget
 void EdbeeConfig::applyToWidget(edbee::TextEditorWidget* widget) const
 {
     fillEditorConfig( widget->config() );
-    widget->controller()->updateAfterConfigChange();
 }
 
 
