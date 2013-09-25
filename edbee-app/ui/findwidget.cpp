@@ -156,7 +156,7 @@ void FindWidget::constructUI()
     QToolButton* but = new QToolButton( this );
     but->setFont( Application::instance()->iconFont() );
     but->setText( QChar(icon_caret_left) ); //<
-    but->setShortcut( editorRef_->controller()->keyMap()->get("find_prev_match") );
+    but->setShortcut( editorRef_->controller()->keyMap()->getSequence("find_prev_match") );
     but->setToolTip( QString(tr("Find Previous (%1)")).arg(but->shortcut().toString()) );
     connect( but, SIGNAL(clicked()), SLOT(findPrevWord()) );
     layout->addWidget( but, 0  );
@@ -164,7 +164,7 @@ void FindWidget::constructUI()
     but = new QToolButton( this );
     but->setFont( Application::instance()->iconFont() );
     but->setText( QChar(icon_caret_right) ); // >
-    but->setShortcut( editorRef_->controller()->keyMap()->get("find_next_match") );
+    but->setShortcut( editorRef_->controller()->keyMap()->getSequence("find_next_match") );
     but->setToolTip( QString(tr("Find Next (%1)")).arg(but->shortcut().toString()) );
     connect( but, SIGNAL(clicked()), SLOT(findNextWord()) );
     layout->addWidget( but, 0 );
@@ -173,7 +173,7 @@ void FindWidget::constructUI()
     but = new QToolButton( this );
     but->setFont( Application::instance()->iconFont() );
     but->setText( QChar(icon_th) ); // >
-    but->setShortcut( editorRef_->controller()->keyMap()->get("sel_all_matches") );
+    but->setShortcut( editorRef_->controller()->keyMap()->getSequence("sel_all_matches") );
     but->setToolTip( QString(tr("Select All (%1)")).arg(but->shortcut().toString()) );
     connect( but, SIGNAL(clicked()), SLOT(selectAllWords()) );
     layout->addWidget( but, 0 );
