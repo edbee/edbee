@@ -32,6 +32,12 @@ public:
 
     EdbeeConfig* config() const;
 
+    // os specific items
+    bool isOSX();
+    bool isX11();
+    bool isWin();
+    const char* osNameString();
+
 protected:
     bool event(QEvent* event);
     bool eventFilter(QObject *obj, QEvent *ev);

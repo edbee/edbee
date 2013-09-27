@@ -72,7 +72,9 @@ void Application::initApplication()
 
     // add the configuration paths to the edbeeconfig
     config()->addFile( QString("%1%2").arg(appConfigPath()).arg("default.json") );
-    config()->addFile( QString("%1%2").arg(userConfigPath()).arg("default.json"), true );
+    config()->addFile( QString("%1%2").arg(appConfigPath()).arg( QString("default.%1.json").arg(osNameString()) ), EdbeeConfig::Optional );
+    config()->addFile( QString("%1%2").arg(userConfigPath()).arg("default.json"), EdbeeConfig::AutoCreate );
+    config()->addFile( QString("%1%2").arg(userConfigPath()).arg( QString("default.%1.json").arg(osNameString()) ), EdbeeConfig::Optional );
 
 
     // load the configuration
@@ -141,7 +143,53 @@ QString Application::userConfigPath() const
 /// Returns the edbee configuration
 EdbeeConfig* Application::config() const
 {
-    return config_;
+       return config_;
+}
+
+/// This method returnst true if we're running on Mac OS X
+/// Note: I could have used macro's but that will probably litter the application with #ifdefs
+/// the current approach is much more flexible.
+bool Application::isOSX()
+{
+#ifdef Q_OS_MAC
+    return true;
+#else
+    return false;
+#endif
+}
+
+/// This method reutrns true if we're running on a Unix X11 environment
+bool Application::isX11()
+{
+#ifdef Q_OS_X11
+    return true;
+#else
+    return false;
+#endif
+}
+
+/// Returns true if the current environment is windows
+bool Application::isWin()
+{
+#ifdef Q_OS_WIN32
+    return true;
+#else
+    return false;
+#endif
+}
+
+/// This method returns the operatingsystem string
+/// that's can be used as prefix/postfix items in config-settings
+const char *Application::osNameString()
+{
+#ifdef Q_OS_MAC
+    return "osx";
+#elif Q_OS_WIN32
+    return "win";
+#else
+    return "x11";
+#endif
+
 }
 
 

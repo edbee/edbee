@@ -22,16 +22,18 @@ EdbeeConfig::EdbeeConfig()
 /// When destructing the config the cascading variant is destroyed
 EdbeeConfig::~EdbeeConfig()
 {
-    qDeleteAll( configMapList_);
+    qDeleteAll( configFileItemList_ );
 }
 
 /// Adds a config file to the edbee configuration
 /// The configuration aren't loaded directly
-void EdbeeConfig::addFile(const QString& fileName, bool createIfNotExists )
+/// @param fileName the name of the file
+/// @param configFileMode the filemode of the config file (Autocreate, Optional or WarnIfMissing)
+void EdbeeConfig::addFile(const QString& fileName, ConfigFileMode configFileMode )
 {
-    configFileList_.push_back( fileName );
-    configMapList_.push_back( new edbee::CascadingQVariantMap( configMap() ) );
-    if( createIfNotExists ) {
+    EdbeeConfigFileItem* cfi = new EdbeeConfigFileItem(fileName,configFileMode, this->configMap() );
+    configFileItemList_.push_back(cfi);
+    if( configFileMode == AutoCreate ) {
         QFile file(fileName);
         if( !file.exists() ) {
             if( file.open( QIODevice::WriteOnly ) ) {
@@ -43,23 +45,30 @@ void EdbeeConfig::addFile(const QString& fileName, bool createIfNotExists )
 }
 
 /// Loads the configuration fom the files and places them in the configmap
+/// This method returns true on success, false on error
 bool EdbeeConfig::loadConfig()
 {
-    Q_ASSERT( configFileList_.size() == configMapList_.size() );
-
     // result handling
     bool result = true;
-    loadMessageList_.clear();
 
     // read all variant-maps from the config files
-    for( int i=0, cnt=configFileList_.size(); i<cnt; ++i ) {
+    foreach( EdbeeConfigFileItem* cfi, configFileItemList_ ) {
+        cfi->setLoadMessage(QString()); // clear the load messsage
+
         edbee::JsonParser parser;
-        if( parser.parse(configFileList_.at(i)) ) {
-            configMapList_.at(i)->setQVariantMap( parser.result().toMap() );
-            loadMessageList_.push_back( QString() );                            // we would like the same amount of result texts as files
+        if( QFile::exists( cfi->file() ) ) {
+            if( parser.parse( cfi->file() ) ) {
+                cfi->configMap()->setQVariantMap( parser.result().toMap() );
+            } else {
+                cfi->setLoadMessage( parser.fullErrorMessage() );
+                result = false;
+            }
         } else {
-            loadMessageList_.push_back( parser.fullErrorMessage() );
-            result = false;
+            // if it isn't an optional file, add an error mesage
+            if( cfi->mode() != Optional ) {
+                cfi->setLoadMessage( QObject::tr("File %1 not found!").arg(cfi->file()) );
+                result = false;
+            }
         }
     }
     return result;
@@ -96,26 +105,75 @@ void EdbeeConfig::applyToWidget(edbee::TextEditorWidget* widget) const
 /// returns the qvariant map
 edbee::CascadingQVariantMap* EdbeeConfig::configMap() const
 {
-    if( configMapList_.isEmpty() ) return 0;
-    return configMapList_.last();
+    if( configFileItemList_.empty() ) return 0;
+    return configFileItemList_.last()->configMap();
 }
 
 /// Retursn the number of files in this configuration
 int EdbeeConfig::fileCount() const
 {
-    return configFileList_.size();
+    return configFileItemList_.size();
 }
 
 /// Returns the filename at the given index
 QString EdbeeConfig::file(int idx) const
 {
-    return configFileList_.at(idx);
+    return configFileItemList_.at(idx)->file();
 }
 
 /// Returns the load message for the given file
 /// The load message will be null-string if the load was successfull
 QString EdbeeConfig::loadMessageForFile(int idx) const
 {
-    Q_ASSERT(idx < loadMessageList_.size() );
-    return loadMessageList_.at(idx);
+    Q_ASSERT(idx < configFileItemList_.size() );
+    return configFileItemList_.at(idx)->loadMessage();
+}
+
+
+//----------------------------------------------
+
+/// Constructs an config item
+/// @param file the configuration filename
+/// @parma mode the mode how to handle this file
+EdbeeConfigFileItem::EdbeeConfigFileItem(const QString& file, EdbeeConfig::ConfigFileMode mode, edbee::CascadingQVariantMap* parentConfigMap )
+    : mode_(mode)
+    , file_(file)
+    , configMap_(0)
+{
+    configMap_ = new edbee::CascadingQVariantMap( parentConfigMap );
+}
+
+EdbeeConfigFileItem::~EdbeeConfigFileItem()
+{
+    delete configMap_;
+}
+
+/// returns the file mode of this item
+EdbeeConfig::ConfigFileMode EdbeeConfigFileItem::mode() const
+{
+    return mode_;
+}
+
+/// Retursn the filename
+QString EdbeeConfigFileItem::file() const
+{
+    return file_;
+}
+
+/// Sets the loading result message
+void EdbeeConfigFileItem::setLoadMessage(const QString& str)
+{
+    loadMessage_ = str;
+}
+
+/// Returns the error/load message. When the result is QString() there's no message
+QString EdbeeConfigFileItem::loadMessage() const
+{
+    return loadMessage_;
+}
+
+/// Returns the configmap
+edbee::CascadingQVariantMap *EdbeeConfigFileItem::configMap()
+{
+    return configMap_;
 }

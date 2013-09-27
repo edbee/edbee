@@ -14,15 +14,25 @@ namespace edbee {
 }
 
 
+class EdbeeConfigFileItem;
+
 /// A general class to load the 'nested' configuration
 /// from the config direction
 class EdbeeConfig
 {
 public:
+
+    /// this enumeration is used to describe the configuration file mode handling
+    enum ConfigFileMode {
+        AutoCreate,         ///< Create the file if it doesn't exist, no warning
+        Optional,           ///< Just skip the file if it doesn't exist
+        WarnIfMissing       ///< Warn if the given file is missing
+    };
+
     explicit EdbeeConfig();
     virtual ~EdbeeConfig();
 
-    void addFile( const QString& fileName, bool createIfNotExists=false );
+    void addFile( const QString& fileName, ConfigFileMode configFileMode=WarnIfMissing );
 
     bool loadConfig();
     void fillEditorConfig( edbee::TextEditorConfig* config ) const;
@@ -36,8 +46,30 @@ public:
 
 private:
 
-    QStringList configFileList_;                           ///< The configuration file names
-    QList<edbee::CascadingQVariantMap*> configMapList_;    ///< The list of config-maps (internally these maps list to eachother)
-    QStringList loadMessageList_;                          ///< A list with parse results
-
+    QList<EdbeeConfigFileItem*> configFileItemList_;       ///< A list with all config file items
 };
+
+
+/// An intenal class for representing a single config-file item
+class EdbeeConfigFileItem
+{
+public:
+    EdbeeConfigFileItem(const QString& file, EdbeeConfig::ConfigFileMode mode , edbee::CascadingQVariantMap *parentConfigMap);
+    virtual ~EdbeeConfigFileItem();
+
+    EdbeeConfig::ConfigFileMode mode() const;
+    QString file() const;
+    void setLoadMessage( const QString& str );
+    QString loadMessage() const;
+
+    edbee::CascadingQVariantMap* configMap();
+
+
+private:
+
+    EdbeeConfig::ConfigFileMode mode_;       ///< The configuration file mode
+    QString file_;                           ///< The config file
+    QString loadMessage_;                    ///< The configuration load message
+    edbee::CascadingQVariantMap* configMap_; ///< The configuration map
+};
+
