@@ -9,19 +9,18 @@
 #include "QsLogDest.h"
 
 #include "application.h"
-#include "ui/mainwindow.h"
 
 #include "debug.h"
 
 
 int main(int argc, char* argv[])
 {
-    Application qapp(argc, argv);
-    qapp.setApplicationName( "edbee" );
-    qapp.setApplicationVersion( "0.1");
-    qapp.setOrganizationName( "edbee" );
-    qapp.setOrganizationDomain( "edbee.net" );
-    qapp.setApplicationDisplayName("edbee - a sample application for the edbee component");
+    Application app(argc, argv);
+    app.setApplicationName( "edbee" );
+    app.setApplicationVersion( "0.1");
+    app.setOrganizationName( "edbee" );
+    app.setOrganizationDomain( "edbee.net" );
+    app.setApplicationDisplayName("edbee - a sample application for the edbee component");
 
     // init the logging mechanism
     QsLogging::Logger& logger = QsLogging::Logger::instance();
@@ -33,11 +32,13 @@ int main(int argc, char* argv[])
 //    logger.addDestination(fileDestination.get());
     logger.setLoggingLevel(QsLogging::TraceLevel);
 
-    // parse the syntax files
-    qapp.initApplication();
+    // initialize the application (parsing syntax files, load configuration et)
+    app.initApplication();
 
-    // show the main window
-    MainWindow mainWindow( &qapp );
-    mainWindow.show();
-    return qapp.exec();
+    // run the application
+    int result = app.exec();
+
+    // perform a shutdown and return the result
+    app.shutdown();
+    return result;
 }

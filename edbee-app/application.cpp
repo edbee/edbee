@@ -17,30 +17,30 @@
 #include "edbee/views/texttheme.h"
 #include "models/edbeeconfig.h"
 #include "QtAwesome.h"
+#include "ui/mainwindow.h"
+#include "ui/windowmanager.h"
 
 #include "debug.h"
 
-static Application* inst;
 
+/// constructs the main appication object
+/// @param argc the application argument acount
+/// @param argv the application arguments
 Application::Application(int& argc, char** argv )
     : QApplication( argc, argv )
     , qtAwesome_(0)
     , config_(0)
 {
-    inst = this;
     config_ = new EdbeeConfig();
+    windowManager_ = new WindowManager();
 }
 
+/// destruct the 'owned' objects
 Application::~Application()
 {
+    delete windowManager_;
     delete config_;
     delete qtAwesome_;
-}
-
-/// returns the application instance
-Application* Application::instance()
-{
-    return inst;
 }
 
 
@@ -99,8 +99,17 @@ void Application::initApplication()
     qtAwesome_ = new QtAwesome( this);
     qtAwesome_->initFontAwesome();
 
+    // construct the first window and show it
+    // (probably we should restore the last window state over here :)
+    windowManager()->createWindow()->show();
 }
 
+/// thsi method shutsdown the application
+void Application::shutdown()
+{
+}
+
+/// returns the qtAwesome instance for the application's icons
 QtAwesome *Application::qtAwesome() const
 {
     return qtAwesome_;
@@ -143,7 +152,13 @@ QString Application::userConfigPath() const
 /// Returns the edbee configuration
 EdbeeConfig* Application::config() const
 {
-       return config_;
+    return config_;
+}
+
+/// Returns the application window manager
+WindowManager* Application::windowManager() const
+{
+    return windowManager_;
 }
 
 /// This method returnst true if we're running on Mac OS X
@@ -210,10 +225,12 @@ bool Application::event(QEvent* event)
     }
 }
 
-bool Application::eventFilter(QObject* obj, QEvent* ev)
+
+/// A global function to access the edbee application quickly
+/// returns the Application instance
+Application* edbeeApp()
 {
-    Q_UNUSED(obj);
-    Q_UNUSED(ev);
-    return false;
+    return static_cast<Application *>(qApp);
 }
+
 

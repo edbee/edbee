@@ -10,6 +10,7 @@
 
 class EdbeeConfig;
 class QtAwesome;
+class WindowManager;
 
 /// The global application for the edbee editor
 class Application : public QApplication
@@ -19,9 +20,9 @@ public:
     explicit Application(int& argc, char** argv);
     virtual ~Application();
 
-    static Application* instance();
-
     void initApplication();
+    void shutdown();
+
     QtAwesome* qtAwesome() const;
     QFont iconFont( int size=12 ) const;
 
@@ -31,6 +32,7 @@ public:
     QString userConfigPath() const;
 
     EdbeeConfig* config() const;
+    WindowManager* windowManager() const;
 
     // os specific items
     bool isOSX();
@@ -38,9 +40,10 @@ public:
     bool isWin();
     const char* osNameString();
 
+
 protected:
     bool event(QEvent* event);
-    bool eventFilter(QObject *obj, QEvent *ev);
+
 
 private:
     QString appDataPath_;           ///< The application data path
@@ -48,4 +51,8 @@ private:
     QtAwesome* qtAwesome_;          ///< The QtAwesome IconFont instance
 
     EdbeeConfig* config_;           ///< The main edbee configuration file
+    WindowManager* windowManager_;  ///< The window manager
 };
+
+
+extern Application* edbeeApp();

@@ -40,15 +40,15 @@
 #include "findwidget.h"
 #include "gotowidget.h"
 #include "models/edbeeconfig.h"
+#include "ui/windowmanager.h"
 
 #include "debug.h"
 
 
 static const int FileSizeWarning = 1024*1024*20;  // Larger then 20 MB give a warning!
 
-MainWindow::MainWindow(Application* application, QWidget* parent)
+MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , applicationRef_(application)
     , fileTreeSideWidgetRef_(0)
     , tabWidgetRef_(0)
     , statusBarRef_(0)
@@ -65,12 +65,6 @@ MainWindow::MainWindow(Application* application, QWidget* parent)
 MainWindow::~MainWindow()
 {    
     qDeleteAll(actionMap_);
-}
-
-/// Returns the reference to the application
-Application *MainWindow::application() const
-{
-    return applicationRef_;
 }
 
 /// opens the given directory or the given file. Depending on the type it will open
@@ -237,6 +231,18 @@ bool MainWindow::saveFileAs()
     }
     widget->setProperty("file","");
     return false;
+}
+
+/// opens a new window
+void MainWindow::windowNew()
+{
+    edbeeApp()->windowManager()->createWindow()->show();
+}
+
+/// closes this window
+void MainWindow::windowClose()
+{
+    close();
 }
 
 /// Updates the persisted state of the document
@@ -436,11 +442,25 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 }
 
 
+/// When the window is closed the close event need to handled
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+//    if (maybeSave()) {
+//        writeSettings();
+//        event->accept();
+//    } else {
+//        event->ignore();
+//    }
+    emit windowClosed();
+    QMainWindow::closeEvent(event);
+}
+
+
 /// This method simply creates new editor. Applying all settings
 edbee::TextEditorWidget* MainWindow::createEditorWidget()
 {
     edbee::TextEditorWidget* result = new edbee::TextEditorWidget();
-    application()->config()->applyToWidget( result );
+    edbeeApp()->config()->applyToWidget( result );
     return result;
 }
 
@@ -506,7 +526,8 @@ void MainWindow::constructActions()
     createAction( "goto.line", tr("&Goto Line..."), QKeySequence( Qt::META + Qt::Key_G), this, SLOT(showGotoEntryPopup()) );
 
 
-    createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(deleteLater() ) );
+    createAction("win.new", tr("&New Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_N ), this, SLOT(windowNew() ) );
+    createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(windowClose() ) );
     createAction("win.minimize",tr("&Minimize"), QKeySequence(Qt::CTRL + Qt::Key_M ), this, SLOT(showMinimized()) );
     createAction("win.maximize",tr("&Zoom"), QKeySequence(), this, SLOT(showMaximized()) );
     createAction("win.fullscreen",tr("Enter FullScreen"), QKeySequence::FullScreen, this, SLOT(showFullScreen()) );
@@ -618,6 +639,10 @@ void MainWindow::constructMenu()
     fileMenu->addSeparator();
     fileMenu->addAction( action("file.close"));
 
+    fileMenu->addSeparator();
+    fileMenu->addAction( action("win.new"));     // Isn't the window menu a more logical place for this command?
+    fileMenu->addAction( action("win.close"));
+
 
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction( action("undo") );
@@ -641,6 +666,8 @@ void MainWindow::constructMenu()
     windowMenu->addAction( action("win.maximize"));
     windowMenu->addSeparator();
     windowMenu->addAction( action("win.fullscreen"));
+    windowMenu->addSeparator();
+    windowMenu->addAction( action("win.new"));     // I think it is, so we add those options here too :)
     windowMenu->addAction( action("win.close"));
 
 }

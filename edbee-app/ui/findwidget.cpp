@@ -117,21 +117,21 @@ void FindWidget::constructUI()
 
 
     QToolButton* toggleButton = new QToolButton(this);
-    toggleButton->setFont( Application::instance()->iconFont() );
+    toggleButton->setFont( edbeeApp()->iconFont() );
     toggleButton->setText( QChar(icon_repeat) );
     toggleButton->setToolTip(tr("Wrap Around"));
     toggleButton->setCheckable(true);
     layout->addWidget( toggleButton, 0 );
 
     toggleButton = new QToolButton(this);
-    toggleButton->setFont( Application::instance()->iconFont() );
+    toggleButton->setFont( edbeeApp()->iconFont() );
     toggleButton->setText( QChar(icon_asterisk) );
     toggleButton->setToolTip(tr("Regular Expressions"));
     toggleButton->setCheckable(true);
     layout->addWidget( toggleButton, 0 );
 
     toggleButton = new QToolButton(this);
-    toggleButton->setFont( Application::instance()->iconFont() );
+    toggleButton->setFont( edbeeApp()->iconFont() );
     toggleButton->setText( QChar(icon_font) );
     toggleButton->setToolTip(tr("Case Sensitive"));
     toggleButton->setCheckable(true);
@@ -154,7 +154,7 @@ void FindWidget::constructUI()
     // add the action
 
     QToolButton* but = new QToolButton( this );
-    but->setFont( Application::instance()->iconFont() );
+    but->setFont( edbeeApp()->iconFont() );
     but->setText( QChar(icon_caret_left) ); //<
     but->setShortcut( editorRef_->controller()->keyMap()->getSequence("find_prev_match") );
     but->setToolTip( QString(tr("Find Previous (%1)")).arg(but->shortcut().toString()) );
@@ -162,7 +162,7 @@ void FindWidget::constructUI()
     layout->addWidget( but, 0  );
 
     but = new QToolButton( this );
-    but->setFont( Application::instance()->iconFont() );
+    but->setFont( edbeeApp()->iconFont() );
     but->setText( QChar(icon_caret_right) ); // >
     but->setShortcut( editorRef_->controller()->keyMap()->getSequence("find_next_match") );
     but->setToolTip( QString(tr("Find Next (%1)")).arg(but->shortcut().toString()) );
@@ -171,7 +171,7 @@ void FindWidget::constructUI()
 
 
     but = new QToolButton( this );
-    but->setFont( Application::instance()->iconFont() );
+    but->setFont( edbeeApp()->iconFont() );
     but->setText( QChar(icon_th) ); // >
     but->setShortcut( editorRef_->controller()->keyMap()->getSequence("sel_all_matches") );
     but->setToolTip( QString(tr("Select All (%1)")).arg(but->shortcut().toString()) );

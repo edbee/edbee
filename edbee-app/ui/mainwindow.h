@@ -28,11 +28,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(Application* application, QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 
-    Application* application() const;
-    
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
@@ -43,6 +41,9 @@ public slots:
     void closeFileWithTabIndex( int idx=-1 );
     bool saveFile();
     bool saveFileAs();
+
+    void windowNew();
+    void windowClose();
 
     void updatePersistedState();
     void updateTabName( int tabIndex=-1 );
@@ -74,6 +75,11 @@ protected:
     virtual void dropEvent(QDropEvent* event);
     virtual void dragEnterEvent( QDragEnterEvent* event );
 
+    virtual void closeEvent( QCloseEvent* event );
+
+signals:
+
+    void windowClosed();
 
 
 private:
@@ -92,11 +98,9 @@ private:
     QComboBox* constructEncodingCombo();
     void constructMenu();
 
-
     void connectSignals();
 
 private:
-    Application* applicationRef_;                   ///< The reference to the application
     FileTreeSideWidget* fileTreeSideWidgetRef_;     ///< The side tree widget
     QTabWidget* tabWidgetRef_;                      ///< A reference to the tab widget
     QStatusBar* statusBarRef_;                      ///< The statusbar

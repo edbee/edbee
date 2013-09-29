@@ -22,7 +22,9 @@ SOURCES +=\
     application.cpp \
     ui/gotowidget.cpp \
     ui/findwidget.cpp \
-    models/edbeeconfig.cpp
+    models/edbeeconfig.cpp \
+    io/sessionserializer.cpp \
+    ui/windowmanager.cpp
 
 HEADERS  += \
     ui/mainwindow.h \
@@ -30,7 +32,9 @@ HEADERS  += \
     application.h \
     ui/gotowidget.h \
     ui/findwidget.h \
-    models/edbeeconfig.h
+    models/edbeeconfig.h \
+    io/sessionserializer.h \
+    ui/windowmanager.h
 
 
 RESOURCES += \
