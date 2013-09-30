@@ -47,6 +47,8 @@
 
 static const int FileSizeWarning = 1024*1024*20;  // Larger then 20 MB give a warning!
 
+
+/// Constructor for a main application windows
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , fileTreeSideWidgetRef_(0)
@@ -62,10 +64,53 @@ MainWindow::MainWindow(QWidget* parent)
     connectSignals();
 }
 
+/// The application destructor
 MainWindow::~MainWindow()
 {    
     qDeleteAll(actionMap_);
 }
+
+
+/// returns the number of tabs
+int MainWindow::tabCount() const
+{
+    return tabWidgetRef_->count();
+}
+
+/// Returns the filenane open in the given tab
+/// @param idx the tab index
+/// @return the filename
+QString MainWindow::tabFilename(int idx) const
+{
+    edbee::TextEditorWidget* widget = this->tabEditor(idx);
+    if( widget ) {
+        return widget->property("file").toString();
+    }
+    return QString();
+}
+
+
+/// Returns the editor widget at the given tab index
+/// @param index the tab index (if no index is supplied the current tab is used)
+/// @return the edbee::editor widget or 0 if not found
+edbee::TextEditorWidget* MainWindow::tabEditor(int index) const
+{
+    if( index < 0 ) {
+        index = tabWidgetRef_->currentIndex();
+        if(index<0) { return 0; }
+    }
+    QWidget* widget = tabWidgetRef_->widget(index);
+    return qobject_cast<edbee::TextEditorWidget*>(widget);
+}
+
+
+/// Returns the active tab index.
+/// @return the active tab index or -1 if no tab was active
+int MainWindow::activeTabIndex() const
+{
+    return tabWidgetRef_->currentIndex();
+}
+
 
 /// opens the given directory or the given file. Depending on the type it will open
 /// a file in an editor window or it will open the directory in the sidebar
@@ -152,7 +197,6 @@ void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fi
 {
     QFileInfo info( fileName );
 
-
     // set the state to 'persisted'
     editor->textDocument()->setPersisted();
     editor->setProperty("file",fileName);
@@ -179,7 +223,7 @@ void MainWindow::closeFileWithTabIndex(int idx)
         idx = tabWidgetRef_->currentIndex();
     }
     if( idx >= 0 ) {
-        edbee::TextEditorWidget* widget = editorForTab( idx );
+        edbee::TextEditorWidget* widget = tabEditor( idx );
         if( widget && !widget->textDocument()->isPersisted() ) {
             QMessageBox::StandardButton but = QMessageBox::question(this, tr("Save changes?"), tr("File has been changed, do you want to save the changes?"), QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel );
             if( but == QMessageBox::Save ) {
@@ -197,7 +241,7 @@ void MainWindow::closeFileWithTabIndex(int idx)
 /// saves the file
 bool MainWindow::saveFile()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     edbee::TextDocument* doc = widget->textDocument();
     if( !widget ) { return false; }
     QString fileName = widget->property("file").toString();
@@ -219,7 +263,7 @@ bool MainWindow::saveFile()
 /// Saves the file as a given name
 bool MainWindow::saveFileAs()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( !widget ) { return false; }
 
     QString filename = QFileDialog::getSaveFileName( this, tr("Save file as") );
@@ -250,7 +294,7 @@ void MainWindow::updatePersistedState()
 {
     bool persisted = true;
     for( int i=0; i < this->tabWidgetRef_->count(); ++i ) {
-        edbee::TextEditorWidget* textEditor = editorForTab(i);
+        edbee::TextEditorWidget* textEditor = tabEditor(i);
         if( textEditor ) {
             persisted = persisted && textEditor->textDocument()->isPersisted();
         }
@@ -262,7 +306,7 @@ void MainWindow::updatePersistedState()
 void MainWindow::updateTabName(int tabIndex)
 {
     if( tabIndex < 0 ) { tabIndex = tabWidgetRef_->currentIndex(); }
-    edbee::TextEditorWidget* widget = editorForTab(tabIndex);
+    edbee::TextEditorWidget* widget = tabEditor(tabIndex);
     if( !widget ) { return; }
     QString filename = widget->property("file").toString();
     QString tabName("Untitled");
@@ -276,7 +320,7 @@ void MainWindow::updateTabName(int tabIndex)
 
 void MainWindow::activeTabChanged()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         edbee::TextDocument* doc = widget->textDocument();
 
@@ -298,7 +342,7 @@ void MainWindow::activeTabChanged()
 
 void MainWindow::encodingChanged()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         edbee::TextDocument* doc = widget->textDocument();
         edbee::TextCodec* codec = edbee::Edbee::instance()->codecManager()->codecForName( encodingComboRef_->currentText().toLatin1() );
@@ -310,7 +354,7 @@ void MainWindow::encodingChanged()
 
 void MainWindow::lineEndingChanged()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         edbee::TextDocument* doc = widget->textDocument();
         edbee::LineEnding* lineEnding = edbee::LineEnding::get( lineEndingComboRef_->currentIndex() );
@@ -325,7 +369,7 @@ void MainWindow::lineEndingChanged()
 /// Here we forward the selected grammar to the textdocument of the editor
 void MainWindow::grammarChanged()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         edbee::TextDocument* doc = widget->textDocument();
         QString name = grammarComboRef_->itemData( grammarComboRef_->currentIndex() ).toString();
@@ -340,7 +384,7 @@ void MainWindow::grammarChanged()
 void MainWindow::editorActionTrigged()
 {
      QAction* action = qobject_cast<QAction*>(sender());
-     edbee::TextEditorWidget* widget = editorForTab();
+     edbee::TextEditorWidget* widget = tabEditor();
      if( action && widget ) {
          edbee::TextEditorCommand* command = widget->commandMap()->get( action->data().toString() );
          command->execute( widget->controller() );
@@ -350,7 +394,7 @@ void MainWindow::editorActionTrigged()
 /// this method updates the action states for the current editor state.
 void MainWindow::updateStateEditorActions()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     QHash<QString,QAction*>& am = actionMap_;
     bool focus = false;
     if( widget ) {
@@ -373,7 +417,7 @@ void MainWindow::updateStateEditorActions()
 /// thows the goto-entry popup
 void MainWindow::showGotoEntryPopup()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         GotoWidget* gotoWidget = new GotoWidget( widget );
         QPoint pos = widget->mapToGlobal( widget->pos() );
@@ -384,7 +428,7 @@ void MainWindow::showGotoEntryPopup()
 
 void MainWindow::showFindPopup()
 {
-    edbee::TextEditorWidget* widget = editorForTab();
+    edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
         FindWidget* findWidget = (FindWidget*)widget->property("findWidget").value<void *>();
         if( !findWidget ) {
@@ -462,17 +506,6 @@ edbee::TextEditorWidget* MainWindow::createEditorWidget()
     edbee::TextEditorWidget* result = new edbee::TextEditorWidget();
     edbeeApp()->config()->applyToWidget( result );
     return result;
-}
-
-/// Returns the documetn at the given tab
-edbee::TextEditorWidget* MainWindow::editorForTab(int index)
-{
-    if( index < 0 ) {
-        index = tabWidgetRef_->currentIndex();
-        if(index<0) { return 0; }
-    }
-    QWidget* widget = tabWidgetRef_->widget(index);
-    return qobject_cast<edbee::TextEditorWidget*>(widget);
 }
 
 QAction *MainWindow::action(const QString& name)

@@ -38,7 +38,5 @@ int main(int argc, char* argv[])
     // run the application
     int result = app.exec();
 
-    // perform a shutdown and return the result
-    app.shutdown();
     return result;
 }

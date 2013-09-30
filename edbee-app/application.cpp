@@ -15,6 +15,7 @@
 #include "edbee/io/tmlanguageparser.h"
 #include "edbee/edbee.h"
 #include "edbee/views/texttheme.h"
+#include "io/sessionserializer.h"
 #include "models/edbeeconfig.h"
 #include "QtAwesome.h"
 #include "ui/mainwindow.h"
@@ -33,6 +34,7 @@ Application::Application(int& argc, char** argv )
 {
     config_ = new EdbeeConfig();
     windowManager_ = new WindowManager();
+//    connect( this, &Application::aboutToQuit, this, &Application::shutdown );
 }
 
 /// destruct the 'owned' objects
@@ -107,6 +109,18 @@ void Application::initApplication()
 /// thsi method shutsdown the application
 void Application::shutdown()
 {
+
+}
+
+/// This method saves the application state to the last session
+/// When re-opening edbee the state is restored again
+void Application::saveState()
+{
+    // serialize the previous state.
+    SessionSerializer io;
+    if( !io.saveState(lastSessionFilename()) ) {
+        qlog_warn() << "Error saving session state to " << lastSessionFilename();
+    }
 }
 
 /// returns the qtAwesome instance for the application's icons
@@ -146,6 +160,12 @@ QString Application::userDataPath() const
 QString Application::userConfigPath() const
 {
     return QString("%1%2/").arg(userDataPath()).arg("config");
+}
+
+/// Returns the filename that used to store/load the last session state
+QString Application::lastSessionFilename() const
+{
+    return QString("%1%2").arg(userConfigPath()).arg("saved-session.json");
 }
 
 
@@ -208,9 +228,11 @@ const char *Application::osNameString()
 }
 
 
+/// This is the place where all (application) events pass by
+/// unfortunaltely we need to handle an event here
 bool Application::event(QEvent* event)
 {
-//    qlog_info()<< "event: " << event;
+    qlog_info()<< "event: " << event;
     switch (event->type())
     {
         case QEvent::FileOpen:
@@ -220,9 +242,17 @@ bool Application::event(QEvent* event)
             //loadFile(static_cast<QFileOpenEvent *>(event)->file());
             return true;
         }
+
+        // when we recieve a close event the state must be saved
+        case QEvent::Close:
+        {
+            saveState();
+            break;
+        }
         default:
-            return QApplication::event(event);
+            break;
     }
+    return QApplication::event(event);
 }
 
 

@@ -23,6 +23,9 @@ public:
     void initApplication();
     void shutdown();
 
+    void saveState();
+
+
     QtAwesome* qtAwesome() const;
     QFont iconFont( int size=12 ) const;
 
@@ -30,6 +33,7 @@ public:
     QString appConfigPath() const;
     QString userDataPath() const;
     QString userConfigPath() const;
+    QString lastSessionFilename() const;
 
     EdbeeConfig* config() const;
     WindowManager* windowManager() const;

@@ -31,6 +31,11 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     virtual ~MainWindow();
 
+    int tabCount() const;
+    QString tabFilename( int idx = -1 ) const;
+    edbee::TextEditorWidget* tabEditor(int index=-1 ) const;
+    int activeTabIndex() const;
+
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
@@ -85,7 +90,6 @@ signals:
 private:
 
     edbee::TextEditorWidget* createEditorWidget();
-    edbee::TextEditorWidget* editorForTab(int index=-1 );
 
     QAction* action( const QString& name );
     void createEditorAction(const QString& id, const char* text);

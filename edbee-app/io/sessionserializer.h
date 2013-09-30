@@ -9,6 +9,7 @@
 #include <QVariantMap>
 
 class Application;
+class MainWindow;
 
 
 /// The SessionSerializer is used to save/load the application state
@@ -28,12 +29,16 @@ public:
     bool saveState( const QString& fileName );
     bool loadState( const QString& fileName );
 
+    QString errorMessage() const;
+
 protected:
     QVariantMap serialize();
     void unserialize( const QVariantMap& map );
 
-    void serializeApplication( Application* app );
+    QVariantMap serializeApplication( Application* app );
+    QVariantMap serializeMainWindow( MainWindow* win );
 
-
+private:
+    QString errorMessage_;                   ///< The last error message
 };
 
