@@ -9,6 +9,7 @@
 #include <QJsonObject>
 
 #include "application.h"
+#include "edbee/io/jsonparser.h"
 #include "ui/mainwindow.h"
 #include "ui/windowmanager.h"
 
@@ -22,10 +23,12 @@ SessionSerializer::SessionSerializer()
 {
 }
 
+
 /// destructor
 SessionSerializer::~SessionSerializer()
 {
 }
+
 
 /// Saves the current state to the given file
 /// @param fileName the filename to store the state
@@ -43,7 +46,7 @@ bool SessionSerializer::saveState(const QString& fileName)
 
     // serialize the data (into a json document)
     QJsonDocument doc;
-    doc.setObject( QJsonObject::fromVariantMap( serializeApplication( edbeeApp() ) ) );
+    doc.setObject( QJsonObject::fromVariantMap( serialize() ) );
 
     // write it
     file.write( doc.toJson() );
@@ -51,13 +54,25 @@ bool SessionSerializer::saveState(const QString& fileName)
     return true;
 }
 
+
 /// Loads the current state from the given file
 /// @param fileName the filename to load the state from
 /// @return true on success
 bool SessionSerializer::loadState(const QString& fileName)
 {
-    return false;
+    errorMessage_.clear();
+
+    // serialize the data (into a json document)
+    edbee::JsonParser parser;
+    if( !parser.parse(fileName) ) {
+        errorMessage_ = parser.errorMessage();
+        return false;
+    }
+    QVariantMap map = parser.result().toMap();
+    deserializeApplication( edbeeApp(), map );
+    return true;
 }
+
 
 /// Returns the last error message
 QString SessionSerializer::errorMessage() const
@@ -65,19 +80,18 @@ QString SessionSerializer::errorMessage() const
     return errorMessage_;
 }
 
+
 /// This method serializes the application to a QVariantMap
 QVariantMap SessionSerializer::serialize()
 {
-    QVariantMap result;
-
-    return result;
+    return serializeApplication( edbeeApp() );
 }
+
 
 /// Serializes the application
 /// @param app the application to serialize
 QVariantMap SessionSerializer::serializeApplication(Application* app)
 {
-    Q_UNUSED(app);
     QVariantMap result;
 
     // 'remember' all open files per window
@@ -90,6 +104,7 @@ QVariantMap SessionSerializer::serializeApplication(Application* app)
     result.insert("windows",windowList);
     return result;
 }
+
 
 /// Serializes the given main window
 /// @param win the window to serialize
@@ -111,6 +126,9 @@ QVariantMap SessionSerializer::serializeMainWindow(MainWindow* win)
     for( int i=0,cnt=win->tabCount(); i<cnt; ++i ) {
         QVariantMap tab;
         tab.insert("file",win->tabFilename(i));
+        if( win->activeTabIndex() == i ) {
+            tab.insert("active",1);
+        }
 
         /// (TODO: Add line/column scroll information of the given tab!)
         //  edbee::TextEditorWidget* widget = win->tabEditor(i);
@@ -118,7 +136,57 @@ QVariantMap SessionSerializer::serializeMainWindow(MainWindow* win)
         tabs.push_back(tab);
     }
     result.insert("tabs",tabs);
+
     return result;
+}
+
+
+/// Deserializes the given appliation state
+/// @param app a reference to the application
+/// @param map the map with serialized data
+void SessionSerializer::deserializeApplication(Application* app, const QVariantMap& map)
+{
+    WindowManager* winManager = app->windowManager();
+    QVariantList windows = map.value("windows").toList();
+    foreach( QVariant winVar, windows ) {
+        QVariantMap winMap = winVar.toMap();
+        MainWindow* win = winManager->createWindow();
+        deserializeMainWindow( win, winMap );
+        win->show();
+    }
+}
+
+/// deserializes the map to configure this main window
+void SessionSerializer::deserializeMainWindow(MainWindow* win, const QVariantMap& map)
+{
+    // reposition all windows
+    QVariantMap window = map.value("window").toMap();
+    int width = window.value("width").toInt();
+    int height = window.value("height").toInt();
+    int x = window.value("x").toInt();
+    int y = window.value("y").toInt();
+    if( width > 0 && height > 0 ) {
+        win->setGeometry(x,y,width,height);
+    }
+
+    // reopen all existing tabs
+    QVariantList tabs = map.value("tabs").toList();
+    int activeIndex = 0;
+    foreach( QVariant tabVar, tabs ) {
+        QVariantMap tabMap = tabVar.toMap();
+        QString file = tabMap.value("file").toString();
+        bool active = tabMap.value("active").toInt() != 0;
+        if( !file.isEmpty() && QFile::exists(file)) {
+            if( active ) {
+                activeIndex = win->tabCount();
+            }
+            win->openFile( file );
+        }
+    }
+
+    // now select the correct tab
+    win->setActiveTabIndex(activeIndex);
+
 }
 
 

@@ -35,6 +35,7 @@ public:
     QString tabFilename( int idx = -1 ) const;
     edbee::TextEditorWidget* tabEditor(int index=-1 ) const;
     int activeTabIndex() const;
+    void setActiveTabIndex(int idx);
 
 public slots:
     void openDirOrFile( const QString& path );

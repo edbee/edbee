@@ -111,6 +111,14 @@ int MainWindow::activeTabIndex() const
     return tabWidgetRef_->currentIndex();
 }
 
+/// Changes the current active tab index to the given tab
+/// @param idx the index of the new active tab
+void MainWindow::setActiveTabIndex(int idx)
+{
+    if( idx >= tabCount()) { return; }
+    tabWidgetRef_->setCurrentIndex(idx);
+}
+
 
 /// opens the given directory or the given file. Depending on the type it will open
 /// a file in an editor window or it will open the directory in the sidebar

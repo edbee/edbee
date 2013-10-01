@@ -33,10 +33,13 @@ public:
 
 protected:
     QVariantMap serialize();
-    void unserialize( const QVariantMap& map );
+    void deserialize( const QVariantMap& map );
 
     QVariantMap serializeApplication( Application* app );
     QVariantMap serializeMainWindow( MainWindow* win );
+
+    void deserializeApplication( Application* app, const QVariantMap& map);
+    void deserializeMainWindow( MainWindow* win, const QVariantMap& map);
 
 private:
     QString errorMessage_;                   ///< The last error message

@@ -101,15 +101,29 @@ void Application::initApplication()
     qtAwesome_ = new QtAwesome( this);
     qtAwesome_->initFontAwesome();
 
-    // construct the first window and show it
-    // (probably we should restore the last window state over here :)
-    windowManager()->createWindow()->show();
+
+    // restore the last state
+    loadState();
+
+    // Make sure there's always a window open
+    if( windowManager()->windowCount() == 0 ) {
+        windowManager()->createWindow()->show();
+    }
 }
 
 /// thsi method shutsdown the application
 void Application::shutdown()
 {
 
+}
+
+/// Loads the last state of the application
+void Application::loadState()
+{
+    SessionSerializer io;
+    if( !io.loadState(lastSessionFilename()) ) {
+        qlog_warn() << "Error restoring session state to " << lastSessionFilename();
+    }
 }
 
 /// This method saves the application state to the last session
@@ -232,7 +246,7 @@ const char *Application::osNameString()
 /// unfortunaltely we need to handle an event here
 bool Application::event(QEvent* event)
 {
-    qlog_info()<< "event: " << event;
+//    qlog_info()<< "event: " << event;
     switch (event->type())
     {
         case QEvent::FileOpen:
@@ -244,6 +258,8 @@ bool Application::event(QEvent* event)
         }
 
         // when we recieve a close event the state must be saved
+        // Currently this is the only place I could find that could intercept the application quit before the windows are closed
+        // We need to save the state before the windows close, else there's not much state left :D
         case QEvent::Close:
         {
             saveState();

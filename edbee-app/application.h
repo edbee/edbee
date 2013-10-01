@@ -23,6 +23,7 @@ public:
     void initApplication();
     void shutdown();
 
+    void loadState();
     void saveState();
 
 
