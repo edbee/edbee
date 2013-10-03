@@ -36,7 +36,7 @@
 		{ "keys": "select_previous_page", "command": "sel_page_up" },
 
 		{ "keys": "select_all", "command": "sel_all" },
-		{ "keys": "Ctrl+D", "command": "sel_word" },
+		// { "keys": "Ctrl+D", "command": "sel_word" },		// is superseeded by 'find_under_expand'
 		{ "keys": "Ctrl+L", "command": "sel_line" },
 		{ "keys": "Ctrl+Shift+L", "command": "sel_prev_line" },
 		{ "keys": "Meta+shift+Up", "command": "add_caret_prev_line" },
@@ -72,7 +72,7 @@
 		{ "keys": "Ctrl+U", "command": "soft_undo" },
 		{ "keys": "Ctrl+Shift+U", "command": "soft_redo" },
 
-			// clipboard operations
+		// clipboard operations
 		{ "keys": "copy", "command": "copy" },
 		{ "keys": "cut", "command": "cut" },
 		{ "keys": "paste", "command": "paste" },
@@ -88,7 +88,10 @@
 		{ "keys": "find_previous", "command": "find_prev_match" },
 		{ "keys": "Meta+S", "command": "sel_next_match" },
 		{ "keys": "Meta+Shift+S", "command": "sel_prev_match" },
-		{ "keys": "Ctrl+Shift+Meta+A", "command": "sel_all_matches" }
+		{ "keys": "Ctrl+Shift+Meta+A", "command": "sel_all_matches" },
+
+		{ "keys": "Ctrl+D", "command": "find_under_expand"}
+
 	]
 }
 ]
