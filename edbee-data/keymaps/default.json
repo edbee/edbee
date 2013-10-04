@@ -70,7 +70,7 @@
 		{ "keys": "undo", "command": "undo" },
 		{ "keys": "redo", "command": "redo" },
 		{ "keys": "Ctrl+U", "command": "soft_undo" },
-		{ "keys": "Ctrl+Shift+U", "command": "soft_redo" },
+        { "keys": "Ctrl+Shift+U", "command": "soft_redo" },
 
 		// clipboard operations
 		{ "keys": "copy", "command": "copy" },
@@ -90,7 +90,8 @@
 		{ "keys": "Meta+Shift+S", "command": "sel_prev_match" },
 		{ "keys": "Ctrl+Shift+Meta+A", "command": "sel_all_matches" },
 
-		{ "keys": "Ctrl+D", "command": "find_under_expand"}
+        { "keys": "Ctrl+D", "command": "select_under_expand"},
+        { "keys": "Ctrl+Meta+G", "command": "select_all_under" }
 
 	]
 }
