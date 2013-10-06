@@ -55,6 +55,9 @@ public slots:
     void updateTabName( int tabIndex=-1 );
 
     void activeTabChanged();
+    void gotoNextTab();
+    void gotoPrevTab();
+
 
     void encodingChanged();
     void lineEndingChanged();

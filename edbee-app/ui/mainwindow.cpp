@@ -45,6 +45,8 @@
 #include "debug.h"
 
 
+
+/// A build in warning size to warn for big file sizes
 static const int FileSizeWarning = 1024*1024*20;  // Larger then 20 MB give a warning!
 
 
@@ -76,6 +78,7 @@ int MainWindow::tabCount() const
 {
     return tabWidgetRef_->count();
 }
+
 
 /// Returns the filenane open in the given tab
 /// @param idx the tab index
@@ -111,6 +114,7 @@ int MainWindow::activeTabIndex() const
     return tabWidgetRef_->currentIndex();
 }
 
+
 /// Changes the current active tab index to the given tab
 /// @param idx the index of the new active tab
 void MainWindow::setActiveTabIndex(int idx)
@@ -135,6 +139,7 @@ void MainWindow::openDirOrFile(const QString& path)
 
     }
 }
+
 
 /// Opens the given dir in the side-tree window
 void MainWindow::openDir(const QString& path)
@@ -188,12 +193,16 @@ void MainWindow::openFile(const QString& fileName)
     addEditorTab( widget, fileInfo.filePath() );
 }
 
+
+///  Opens a file by showing a file dialog
 void MainWindow::openFile()
 {
     QString fileName = QFileDialog::getOpenFileName(this);
     if( !fileName.isEmpty() ) openFile(fileName);
 }
 
+
+/// Creates a new file (opens an empty tab)
 void MainWindow::newFile()
 {
     addEditorTab( createEditorWidget(), "" );
@@ -201,6 +210,8 @@ void MainWindow::newFile()
 
 
 /// Adds an editor tab
+/// @param edito the editor tab
+/// @param fileName the filename of the file to edit
 void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fileName )
 {
     QFileInfo info( fileName );
@@ -225,6 +236,9 @@ void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fi
     editor->setFocus();
 }
 
+
+/// Closes the file with the given tab indec
+/// @param idx the index of the tab to close
 void MainWindow::closeFileWithTabIndex(int idx)
 {
     if( idx < 0 ) {
@@ -245,6 +259,7 @@ void MainWindow::closeFileWithTabIndex(int idx)
         updatePersistedState(); // maybe the persisted state has changed
     }
 }
+
 
 /// saves the file
 bool MainWindow::saveFile()
@@ -348,6 +363,29 @@ void MainWindow::activeTabChanged()
     updateStateEditorActions();
 }
 
+
+/// Selects the next tab as the active file
+void MainWindow::gotoNextTab()
+{
+    if( tabWidgetRef_->count() > 0 ) {
+        int nextIndex = ( tabWidgetRef_->currentIndex() + 1 ) % tabWidgetRef_->count();
+        tabWidgetRef_->setCurrentIndex( nextIndex );
+    }
+}
+
+
+/// Selects the previous tab as active file
+void MainWindow::gotoPrevTab()
+{
+    if( tabWidgetRef_->count() > 0 ) {
+        int nextIndex = ( tabWidgetRef_->currentIndex() + tabWidgetRef_->count() - 1 ) % tabWidgetRef_->count();
+        tabWidgetRef_->setCurrentIndex( nextIndex );
+    }
+}
+
+
+/// This slot is called if the encoding is changed in the combo
+/// The encoding setting of the document is changed
 void MainWindow::encodingChanged()
 {
     edbee::TextEditorWidget* widget = tabEditor();
@@ -360,6 +398,8 @@ void MainWindow::encodingChanged()
     }
 }
 
+/// This slot is called if the line ending widget is chagned.
+/// The line-ending type of the editor document is changed
 void MainWindow::lineEndingChanged()
 {
     edbee::TextEditorWidget* widget = tabEditor();
@@ -566,6 +606,9 @@ void MainWindow::constructActions()
     createAction( "find.find", tr("&Find..."), QKeySequence::Find, this, SLOT(showFindPopup()));
     createAction( "goto.line", tr("&Goto Line..."), QKeySequence( Qt::META + Qt::Key_G), this, SLOT(showGotoEntryPopup()) );
 
+    createAction( "goto.prev_tab", tr("Previous Tab"), QKeySequence::PreviousChild, this, SLOT(gotoPrevTab()) );
+    createAction( "goto.next_tab", tr("Next Tab"), QKeySequence::NextChild, this, SLOT(gotoNextTab()) );
+
 
     createAction("win.new", tr("&New Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_N ), this, SLOT(windowNew() ) );
     createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(windowClose() ) );
@@ -576,6 +619,8 @@ void MainWindow::constructActions()
 
     createEditorAction( "undo", "&Undo" );
     createEditorAction( "redo", "&Redo" );
+    createEditorAction( "soft_undo", "Soft Undo" );
+    createEditorAction( "soft_redo", "Soft Redo" );
 
     createEditorAction( "cut", "&Cut" );
     createEditorAction( "copy", "&Copy" );
@@ -628,6 +673,8 @@ void MainWindow::constructUI()
     setAcceptDrops(true);
 }
 
+
+/// Constructs the grammar combobox with all loaded grammars
 QComboBox* MainWindow::constructGrammarCombo()
 {
     grammarComboRef_ = new QComboBox();
@@ -643,6 +690,7 @@ QComboBox* MainWindow::constructGrammarCombo()
 }
 
 
+/// Constucts the line eding combobox and fills it with all line ending types
 QComboBox* MainWindow::constructLineEndingCombo()
 {
     // add the line-endings
@@ -655,6 +703,9 @@ QComboBox* MainWindow::constructLineEndingCombo()
     return lineEndingComboRef_;
 }
 
+
+/// Constructs the encoding combobox
+/// And fills the combobox with all encodings known to the codecManager
 QComboBox* MainWindow::constructEncodingCombo()
 {
     // add the line-endings
@@ -669,6 +720,7 @@ QComboBox* MainWindow::constructEncodingCombo()
 }
 
 
+/// BUilds the main menu of the application window
 void MainWindow::constructMenu()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
@@ -689,6 +741,9 @@ void MainWindow::constructMenu()
     editMenu->addAction( action("undo") );
     editMenu->addAction( action("redo") );
     editMenu->addSeparator();
+    editMenu->addAction( action("soft_undo") );
+    editMenu->addAction( action("soft_redo") );
+    editMenu->addSeparator();
     editMenu->addAction( action("cut") );
     editMenu->addAction( action("copy") );
     editMenu->addAction( action("paste") );
@@ -700,6 +755,8 @@ void MainWindow::constructMenu()
 
     QMenu* gotoMenu = menuBar()->addMenu(("&Goto"));
     gotoMenu->addAction( action("goto.line"));
+    gotoMenu->addAction( action("goto.prev_tab"));
+    gotoMenu->addAction( action("goto.next_tab"));
 
 
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
@@ -712,6 +769,7 @@ void MainWindow::constructMenu()
     windowMenu->addAction( action("win.close"));
 
 }
+
 
 void MainWindow::connectSignals()
 {
