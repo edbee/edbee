@@ -51,7 +51,9 @@
 		// line entry
 		{ "keys": "Enter", "command": "ins_newline" },
 		{ "keys": "Return", "command": "ins_newline" },
-		{ "keys": "Backspace", "command": "del_left" },
+        { "keys": "Shift+Enter", "command": "ins_newline" },
+        { "keys": "Shift+Return", "command": "ins_newline" },
+        { "keys": "Backspace", "command": "del_left" },
 		{ "keys": "Shift+Backspace", "command": "del_left" },
 		{ "keys": "Delete", "command": "del_right" },
 
