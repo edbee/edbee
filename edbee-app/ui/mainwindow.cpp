@@ -384,6 +384,22 @@ void MainWindow::gotoPrevTab()
 }
 
 
+/// Goes to the given file
+/// If the file is open it activates the correct tab
+/// If the file isn't open the file is opened in a new tab
+/// @param file the filename to goto
+void MainWindow::gotoFile(const QString& file)
+{
+    for( int i=0,cnt=tabCount(); i<cnt; ++i ) {
+        if( tabFilename(i) == file ) {
+            setActiveTabIndex(i);
+            return;
+        }
+    }
+    openFile( file );
+}
+
+
 /// This slot is called if the encoding is changed in the combo
 /// The encoding setting of the document is changed
 void MainWindow::encodingChanged()
@@ -771,6 +787,7 @@ void MainWindow::constructMenu()
 }
 
 
+/// This method connects some signals between the user interface controls
 void MainWindow::connectSignals()
 {
     connect( tabWidgetRef_, SIGNAL(tabCloseRequested(int)), SLOT(closeFileWithTabIndex(int)) );
@@ -782,7 +799,7 @@ void MainWindow::connectSignals()
 
 
     // tree menu actions
-    connect( fileTreeSideWidgetRef_,SIGNAL(fileDoubleClicked(QString)), SLOT(openFile(QString)) );
+    connect( fileTreeSideWidgetRef_,SIGNAL(fileDoubleClicked(QString)), SLOT(gotoFile(QString)) );
 
 }
 

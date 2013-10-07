@@ -57,6 +57,7 @@ public slots:
     void activeTabChanged();
     void gotoNextTab();
     void gotoPrevTab();
+    void gotoFile( const QString& file );
 
 
     void encodingChanged();
