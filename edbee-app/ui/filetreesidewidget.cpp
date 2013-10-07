@@ -9,16 +9,21 @@
 #include <QFileSystemModel>
 #include <QLabel>
 #include <QMenu>
+#include <QPushButton>
 #include <QTreeView>
 #include <QVBoxLayout>
 
 
+#include "application.h"
 #include "filetreesidewidget.h"
+#include "QtAwesome.h"
 
 #include "debug.h"
 
 
-FileTreeSideWidget::FileTreeSideWidget(QWidget *parent)
+/// Constructs the file side widget
+/// @param parent the parent widget
+FileTreeSideWidget::FileTreeSideWidget(QWidget* parent)
     : QWidget(parent)
     , fileTreeModel_(0)
     , fileTreeRef_(0)
@@ -27,12 +32,15 @@ FileTreeSideWidget::FileTreeSideWidget(QWidget *parent)
     connectSignals();
 }
 
+
+/// The file tree side widget destructor
 FileTreeSideWidget::~FileTreeSideWidget()
 {
     delete fileTreeModel_;
 }
 
 
+/// The file tree is double clicked
 void FileTreeSideWidget::fileTreeDoubleClicked( const QModelIndex& index)
 {
     // when clicking a file
@@ -46,6 +54,8 @@ void FileTreeSideWidget::fileTreeDoubleClicked( const QModelIndex& index)
 }
 
 
+/// Opens the  file tree context menu at the given point
+/// @param point the point to open the context menu
 void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
 {
     // for most widgets
@@ -76,23 +86,29 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
     }
 
     menu.addAction( tr("Goto '/'"), this, SLOT(setRootPath()) );
-
     menu.exec(globalPos);
 }
 
-/// When the rootPath is not given the root is used
+
+/// When the rootPath is not given the root of the filesystem is used
+/// @param rootPath the root path
 void FileTreeSideWidget::setRootPath( const QString& rootPath )
 {
     QModelIndex idx = fileTreeModel_->index( rootPath );
     fileTreeRef_->setRootIndex(idx);
     int index = pathComboRef_->findText(rootPath);
     if( index < 0 ) {
-        pathComboRef_->addItem(rootPath);
+
+        // add the current item
+        pathComboRef_->addItem( rootPath);
         pathComboRef_->setCurrentIndex( pathComboRef_->count()-1 );
+
     } else {
         pathComboRef_->setCurrentIndex(index);
     }
+
 }
+
 
 /// Sets the root path by extacting the path from the QAction data
 void FileTreeSideWidget::setRootPathByAction()
@@ -104,6 +120,26 @@ void FileTreeSideWidget::setRootPathByAction()
 }
 
 
+/// clears the current root path
+void FileTreeSideWidget::clearCurrentRootPath()
+{
+    if( pathComboRef_->currentIndex() > 0 ) {
+        pathComboRef_->removeItem(pathComboRef_->currentIndex());
+    }
+}
+
+
+/// clear all root paths in the combobox
+/// (It keeps the root path of course)
+void FileTreeSideWidget::clearAllRootPaths()
+{
+    for( int i=pathComboRef_->count()-1; i>= 1; --i ) {
+        pathComboRef_->removeItem(i);
+    }
+}
+
+
+/// Constructs the user interface
 void FileTreeSideWidget::constructUI()
 {
     QFont newFont = QFont(font().family(), 10 );
@@ -121,7 +157,6 @@ void FileTreeSideWidget::constructUI()
     fileTreeRef_->setContextMenuPolicy(Qt::CustomContextMenu);
     fileTreeRef_->setModel( fileTreeModel_ );
 
-
 //    QHeaderView* hdr = fileTreeRef_->header();
 //    hdr->setStretchLastSection(true);
 //    hdr->setSortIndicator(0,Qt::AscendingOrder);
@@ -135,18 +170,44 @@ void FileTreeSideWidget::constructUI()
     fileTreeRef_->setIndentation(15);
 
 
+    // create the combobox with a small trash button
     pathComboRef_ = new QComboBox();
     pathComboRef_->addItem("/");
     pathComboRef_->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred );
 
 
+    // add trash button
+    trashButtonRef_ = new QPushButton();
+    trashButtonRef_->setIcon(  edbeeApp()->qtAwesome()->icon( icon_caret_down ) );
+    trashButtonRef_->setFlat(true);
+    trashButtonRef_->setContentsMargins(0,0,0,0);
+    trashButtonRef_->setMaximumWidth(20);
+    trashButtonRef_->setMaximumHeight(16);
+
+    // add a menu for the trash button
+    QMenu* menu = new QMenu(this);
+    menu->addAction( tr("Clear Current Item"), this, SLOT(clearCurrentRootPath()) );
+    menu->addAction( tr("Clear All"), this, SLOT(clearAllRootPaths()) );
+    trashButtonRef_->setMenu(menu);
+
+
+
     QVBoxLayout* layout = new QVBoxLayout();
-    layout->addWidget( pathComboRef_, 0 );
+    layout->setSpacing(0);
+
+    QHBoxLayout* comboLayout = new QHBoxLayout();
+    comboLayout->setSpacing(0);
+    comboLayout->addWidget(pathComboRef_,1);
+    comboLayout->addWidget(trashButtonRef_,0);
+
+    layout->addLayout( comboLayout, 0 );
     layout->addWidget( fileTreeRef_, 1 );
     layout->setMargin(0);
     setLayout( layout);
 }
 
+
+/// Connects all signals
 void FileTreeSideWidget::connectSignals()
 {
     connect( fileTreeRef_, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(fileTreeDoubleClicked(QModelIndex)) );

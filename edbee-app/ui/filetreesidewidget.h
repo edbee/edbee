@@ -9,6 +9,7 @@
 
 class QComboBox;
 class QFileSystemModel;
+class QPushButton;
 class QTreeView;
 
 /// the side tree widget
@@ -28,7 +29,11 @@ public slots:
     void fileTreeContextMenu( const QPoint& point );
     void setRootPath( const QString& rootPath="/" );
     void setRootPathByAction();
-    
+
+    void clearCurrentRootPath();
+    void clearAllRootPaths();
+
+
 private:
 
     void constructUI();
@@ -38,5 +43,6 @@ private:
 private:
     QFileSystemModel* fileTreeModel_;   ///< The tree model
     QTreeView* fileTreeRef_;            ///< A reference to the tree view
-    QComboBox* pathComboRef_;              ///< The current path
+    QComboBox* pathComboRef_;           ///< The current path
+    QPushButton* trashButtonRef_;       ///< A close button
 };

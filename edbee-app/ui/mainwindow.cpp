@@ -66,6 +66,7 @@ MainWindow::MainWindow(QWidget* parent)
     connectSignals();
 }
 
+
 /// The application destructor
 MainWindow::~MainWindow()
 {    
