@@ -93,7 +93,7 @@
 		{ "keys": "Ctrl+Shift+Meta+A", "command": "sel_all_matches" },
 
         { "keys": "Ctrl+D", "command": "select_under_expand"},
-        { "keys": "Ctrl+Meta+G", "command": "select_all_under" }
+        { "keys": "Alt+F3", "command":"select_all_under" }
 
 	]
 }
