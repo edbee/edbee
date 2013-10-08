@@ -37,6 +37,8 @@ public:
     int activeTabIndex() const;
     void setActiveTabIndex(int idx);
 
+    FileTreeSideWidget* fileTreeSideWidget() const;
+
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
@@ -71,7 +73,7 @@ public slots:
 protected slots:
 
     void showGotoEntryPopup();
-    void showFindPopup();
+    void showFindWidget();
 
     void updateActions();
 

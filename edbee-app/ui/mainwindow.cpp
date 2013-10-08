@@ -125,6 +125,13 @@ void MainWindow::setActiveTabIndex(int idx)
 }
 
 
+/// Returns the side tree widget
+FileTreeSideWidget* MainWindow::fileTreeSideWidget() const
+{
+    return fileTreeSideWidgetRef_;
+}
+
+
 /// opens the given directory or the given file. Depending on the type it will open
 /// a file in an editor window or it will open the directory in the sidebar
 /// @param path the path to open
@@ -284,6 +291,7 @@ bool MainWindow::saveFile()
     return true;
 }
 
+
 /// Saves the file as a given name
 bool MainWindow::saveFileAs()
 {
@@ -301,17 +309,20 @@ bool MainWindow::saveFileAs()
     return false;
 }
 
+
 /// opens a new window
 void MainWindow::windowNew()
 {
     edbeeApp()->windowManager()->createWindow()->show();
 }
 
+
 /// closes this window
 void MainWindow::windowClose()
 {
     close();
 }
+
 
 /// Updates the persisted state of the document
 void MainWindow::updatePersistedState()
@@ -325,6 +336,7 @@ void MainWindow::updatePersistedState()
     }
     setWindowModified(!persisted);
 }
+
 
 /// this method updates the tab-name
 void MainWindow::updateTabName(int tabIndex)
@@ -342,6 +354,9 @@ void MainWindow::updateTabName(int tabIndex)
 
 }
 
+
+/// The active tab has change
+/// This requires the updating of the ui controls
 void MainWindow::activeTabChanged()
 {
     edbee::TextEditorWidget* widget = tabEditor();
@@ -415,6 +430,7 @@ void MainWindow::encodingChanged()
     }
 }
 
+
 /// This slot is called if the line ending widget is chagned.
 /// The line-ending type of the editor document is changed
 void MainWindow::lineEndingChanged()
@@ -445,6 +461,7 @@ void MainWindow::grammarChanged()
     }
 }
 
+
 /// executes if an action is triggered
 void MainWindow::editorActionTrigged()
 {
@@ -455,6 +472,7 @@ void MainWindow::editorActionTrigged()
          command->execute( widget->controller() );
      }
 }
+
 
 /// this method updates the action states for the current editor state.
 void MainWindow::updateStateEditorActions()
@@ -479,6 +497,7 @@ void MainWindow::updateStateEditorActions()
     am.value("file.open")->setEnabled(true);
 }
 
+
 /// thows the goto-entry popup
 void MainWindow::showGotoEntryPopup()
 {
@@ -491,7 +510,9 @@ void MainWindow::showGotoEntryPopup()
     }
 }
 
-void MainWindow::showFindPopup()
+
+/// This method shows the find widget
+void MainWindow::showFindWidget()
 {
     edbee::TextEditorWidget* widget = tabEditor();
     if( widget ) {
@@ -515,6 +536,7 @@ void MainWindow::showFindPopup()
     }
 }
 
+
 /// This method updates the actions
 void MainWindow::updateActions()
 {
@@ -523,7 +545,8 @@ void MainWindow::updateActions()
 }
 
 
-void MainWindow::dropEvent(QDropEvent*event)
+/// When a file or folder is dropped try to open it
+void MainWindow::dropEvent(QDropEvent* event)
 {
     // check for our needed mime type, here a file or a list of files
     const QMimeData* mimeData = event->mimeData();
@@ -539,6 +562,8 @@ void MainWindow::dropEvent(QDropEvent*event)
     }
 }
 
+
+/// A drag enter event is recieved
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
@@ -620,7 +645,7 @@ void MainWindow::constructActions()
     createAction( "file.save_as", tr("&Save As..."), QKeySequence::SaveAs, this, SLOT(saveFileAs()) );
 
 
-    createAction( "find.find", tr("&Find..."), QKeySequence::Find, this, SLOT(showFindPopup()));
+    createAction( "find.find", tr("&Find..."), QKeySequence::Find, this, SLOT(showFindWidget()));
     createAction( "goto.line", tr("&Goto Line..."), QKeySequence( Qt::META + Qt::Key_G), this, SLOT(showGotoEntryPopup()) );
 
     createAction( "goto.prev_tab", tr("Previous Tab"), QKeySequence::PreviousChild, this, SLOT(gotoPrevTab()) );
@@ -753,7 +778,6 @@ void MainWindow::constructMenu()
     fileMenu->addAction( action("win.new"));     // Isn't the window menu a more logical place for this command?
     fileMenu->addAction( action("win.close"));
 
-
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction( action("undo") );
     editMenu->addAction( action("redo") );
@@ -765,7 +789,6 @@ void MainWindow::constructMenu()
     editMenu->addAction( action("copy") );
     editMenu->addAction( action("paste") );
 
-
     QMenu* findMenu = menuBar()->addMenu(("&Find"));
     findMenu->addAction( action("find.find"));
 
@@ -774,7 +797,6 @@ void MainWindow::constructMenu()
     gotoMenu->addAction( action("goto.line"));
     gotoMenu->addAction( action("goto.prev_tab"));
     gotoMenu->addAction( action("goto.next_tab"));
-
 
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
     windowMenu->addAction( action("win.minimize"));
@@ -797,7 +819,6 @@ void MainWindow::connectSignals()
     connect( lineEndingComboRef_, SIGNAL(currentIndexChanged(int)), SLOT(lineEndingChanged()) );
     connect( encodingComboRef_, SIGNAL(currentIndexChanged(int)), SLOT(encodingChanged()) );
     connect( grammarComboRef_, SIGNAL(currentIndexChanged(int)), SLOT(grammarChanged()) );
-
 
     // tree menu actions
     connect( fileTreeSideWidgetRef_,SIGNAL(fileDoubleClicked(QString)), SLOT(gotoFile(QString)) );

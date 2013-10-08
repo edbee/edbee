@@ -40,6 +40,42 @@ FileTreeSideWidget::~FileTreeSideWidget()
 }
 
 
+/// Serializes the state of the file tree widget to a variant map
+QVariantMap FileTreeSideWidget::serialize()
+{
+    QVariantMap result;
+    QVariantList paths;
+    for( int i=1, cnt=pathComboRef_->count(); i<cnt; ++i ) {
+        paths.push_back( pathComboRef_->itemText(i));
+    }
+    result.insert("paths",paths);
+    result.insert("active-path-index", pathComboRef_->currentIndex() );
+    return result;
+}
+
+
+/// deserializes the given variant map to the state of this tree widget
+void FileTreeSideWidget::deserialize(const QVariantMap& map)
+{
+    // remove all rootpaths currently available
+    clearAllRootPaths();
+
+    // add all paths to the root combobox list
+    QVariantList paths = map.value("paths").toList();
+    for( int i=0,cnt=paths.size(); i<cnt; ++i ) {
+        QString path = paths.at(i).toString();
+        if( !path.isEmpty() ) {
+            pathComboRef_->addItem(path);
+        }
+    }
+
+    // change the curent index
+    int idx = map.value("active-path-index").toInt();
+    idx = qBound(0,idx,pathComboRef_->count()-1);
+    pathComboRef_->setCurrentIndex(idx);
+}
+
+
 /// The file tree is double clicked
 void FileTreeSideWidget::fileTreeDoubleClicked( const QModelIndex& index)
 {

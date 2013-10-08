@@ -11,6 +11,7 @@
 #include "application.h"
 #include "edbee/io/jsonparser.h"
 #include "ui/mainwindow.h"
+#include "ui/filetreesidewidget.h"
 #include "ui/windowmanager.h"
 
 
@@ -137,6 +138,9 @@ QVariantMap SessionSerializer::serializeMainWindow(MainWindow* win)
     }
     result.insert("tabs",tabs);
 
+    // add the side-widget
+    result.insert("sidebar", win->fileTreeSideWidget()->serialize() );
+
     return result;
 }
 
@@ -155,6 +159,7 @@ void SessionSerializer::deserializeApplication(Application* app, const QVariantM
         win->show();
     }
 }
+
 
 /// deserializes the map to configure this main window
 void SessionSerializer::deserializeMainWindow(MainWindow* win, const QVariantMap& map)
@@ -186,6 +191,9 @@ void SessionSerializer::deserializeMainWindow(MainWindow* win, const QVariantMap
 
     // now select the correct tab
     win->setActiveTabIndex(activeIndex);
+
+    // update the side tree
+    win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
 
 }
 

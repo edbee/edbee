@@ -20,6 +20,9 @@ public:
     explicit FileTreeSideWidget(QWidget *parent = 0);
     virtual ~FileTreeSideWidget();
 
+    QVariantMap serialize();
+    void deserialize( const QVariantMap& map );
+
 signals:
     void fileDoubleClicked( const QString& fileName );
     
