@@ -10,6 +10,7 @@
 
 #include "application.h"
 #include "edbee/io/jsonparser.h"
+#include "models/project.h"
 #include "ui/mainwindow.h"
 #include "ui/filetreesidewidget.h"
 #include "ui/windowmanager.h"
@@ -47,9 +48,10 @@ bool SessionSerializer::saveState(const QString& fileName)
 
     // serialize the data (into a json document)
     QJsonDocument doc;
-    doc.setObject( QJsonObject::fromVariantMap( serialize() ) );
+    QVariantMap data = serializeApplication( edbeeApp() );
+    doc.setObject( QJsonObject::fromVariantMap( data ) );
 
-    // write it
+    // write the docuemnt
     file.write( doc.toJson() );
     file.close();
     return true;
@@ -75,17 +77,44 @@ bool SessionSerializer::loadState(const QString& fileName)
 }
 
 
+/// Saves the project
+/// A project is almost identical to the session state so saving the project here
+/// seems to be ok for the moment
+/// @param fileName the filename to save the project
+bool SessionSerializer::saveProject( Project* project )
+{
+    errorMessage_.clear();
+
+    // open the device
+    QFile file( project->filename() );
+    if( !file.open( QIODevice::WriteOnly) ) {
+        errorMessage_ = file.errorString();
+        return false;
+    }
+
+    // serialize the data
+
+    /// TODO Implement this
+
+
+    return false;
+
+}
+
+
+/// Loads the project
+/// @param fileName the filename to load the project
+Project* SessionSerializer::loadProject()
+{
+    /// TODO Implement this
+    return 0;
+}
+
+
 /// Returns the last error message
 QString SessionSerializer::errorMessage() const
 {
     return errorMessage_;
-}
-
-
-/// This method serializes the application to a QVariantMap
-QVariantMap SessionSerializer::serialize()
-{
-    return serializeApplication( edbeeApp() );
 }
 
 
@@ -194,7 +223,6 @@ void SessionSerializer::deserializeMainWindow(MainWindow* win, const QVariantMap
 
     // update the side tree
     win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
-
 }
 
 

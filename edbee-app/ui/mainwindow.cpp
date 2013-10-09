@@ -40,6 +40,7 @@
 #include "findwidget.h"
 #include "gotowidget.h"
 #include "models/edbeeconfig.h"
+#include "models/project.h"
 #include "ui/windowmanager.h"
 
 #include "debug.h"
@@ -59,17 +60,21 @@ MainWindow::MainWindow(QWidget* parent)
     , grammarComboRef_(0)
     , lineEndingComboRef_(0)
     , encodingComboRef_(0)
+    , project_(0)
 {
+
     constructActions();
     constructUI();
     constructMenu();
     connectSignals();
+    giveProject( new Project() );
 }
 
 
 /// The application destructor
 MainWindow::~MainWindow()
 {    
+    delete project_;
     qDeleteAll(actionMap_);
 }
 
@@ -132,6 +137,23 @@ FileTreeSideWidget* MainWindow::fileTreeSideWidget() const
 }
 
 
+/// Gives the project
+/// @param project
+void MainWindow::giveProject(Project* project)
+{
+    delete project_;
+    project_ = project;
+    fileTreeSideWidgetRef_->setProject( project );
+}
+
+
+/// Returns the current project
+Project*MainWindow::project() const
+{
+    return project_;
+}
+
+
 /// opens the given directory or the given file. Depending on the type it will open
 /// a file in an editor window or it will open the directory in the sidebar
 /// @param path the path to open
@@ -144,7 +166,6 @@ void MainWindow::openDirOrFile(const QString& path)
         } else {
             openFile( path );
         }
-
     }
 }
 
@@ -306,6 +327,60 @@ bool MainWindow::saveFileAs()
         return true;
     }
     widget->setProperty("file","");
+    return false;
+}
+
+
+/// Opens the given project
+/// @param file the file of the project
+bool MainWindow::openProject( const QString& file )
+{
+    /// TODO Implement this
+
+    return false;
+}
+
+
+/// open the project and shows a dialog
+bool MainWindow::openProject()
+{
+
+    /// TODO Implement this
+
+    return false;
+}
+
+
+/// Saves the current project
+bool MainWindow::saveProject()
+{
+    if( !project_ ) {
+        return saveProjectAs();
+    }
+
+    /// TODO Implement this
+
+
+    return false;
+}
+
+
+/// Saves the current project as a given name
+bool MainWindow::saveProjectAs()
+{
+    // show the file dialog
+    QString filename = QFileDialog::getSaveFileName( this, tr("Save project as") );
+    if( filename.isEmpty() ) { return false; }
+
+    QScopedPointer<Project> oldProject(project_);
+
+    // create a new project
+    project_ = new Project( project_ );
+    project_->setFilename( filename );
+    if( saveFile() ) {
+        return true;
+    }
+    oldProject.reset(); // do not delete the old porject
     return false;
 }
 
@@ -651,13 +726,15 @@ void MainWindow::constructActions()
     createAction( "goto.prev_tab", tr("Previous Tab"), QKeySequence::PreviousChild, this, SLOT(gotoPrevTab()) );
     createAction( "goto.next_tab", tr("Next Tab"), QKeySequence::NextChild, this, SLOT(gotoNextTab()) );
 
+    createAction( "project.open", tr("&Open Project..."), QKeySequence(), this, SLOT(openProject()) );
+    createAction( "project.save", tr("Save Project"), QKeySequence(), this, SLOT(saveProject()) );
+    createAction( "project.save_as", tr("&Save Project As..."), QKeySequence(), this, SLOT(saveProjectAs()) );
 
     createAction("win.new", tr("&New Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_N ), this, SLOT(windowNew() ) );
     createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(windowClose() ) );
     createAction("win.minimize",tr("&Minimize"), QKeySequence(Qt::CTRL + Qt::Key_M ), this, SLOT(showMinimized()) );
     createAction("win.maximize",tr("&Zoom"), QKeySequence(), this, SLOT(showMaximized()) );
     createAction("win.fullscreen",tr("Enter FullScreen"), QKeySequence::FullScreen, this, SLOT(showFullScreen()) );
-
 
     createEditorAction( "undo", "&Undo" );
     createEditorAction( "redo", "&Redo" );
@@ -762,7 +839,7 @@ QComboBox* MainWindow::constructEncodingCombo()
 }
 
 
-/// BUilds the main menu of the application window
+/// Builds the main menu of the application window
 void MainWindow::constructMenu()
 {
     QMenu* fileMenu = menuBar()->addMenu(tr("&File"));
@@ -792,11 +869,15 @@ void MainWindow::constructMenu()
     QMenu* findMenu = menuBar()->addMenu(("&Find"));
     findMenu->addAction( action("find.find"));
 
-
     QMenu* gotoMenu = menuBar()->addMenu(("&Goto"));
     gotoMenu->addAction( action("goto.line"));
     gotoMenu->addAction( action("goto.prev_tab"));
     gotoMenu->addAction( action("goto.next_tab"));
+
+    QMenu* projectMenu = menuBar()->addMenu("&Project");
+    projectMenu->addAction( action("project.open") );
+    projectMenu->addAction( action("project.save") );
+    projectMenu->addAction( action("project.save_as") );
 
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
     windowMenu->addAction( action("win.minimize"));
@@ -806,7 +887,6 @@ void MainWindow::constructMenu()
     windowMenu->addSeparator();
     windowMenu->addAction( action("win.new"));     // I think it is, so we add those options here too :)
     windowMenu->addAction( action("win.close"));
-
 }
 
 

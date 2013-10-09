@@ -17,6 +17,8 @@ class QTreeView;
 
 class Application;
 class FileTreeSideWidget;
+class Project;
+
 
 namespace edbee {
 class TextEditorWidget;
@@ -24,6 +26,7 @@ class TextEditorDocument;
 }
 
 /// A main editor window
+/// We probably need to clean this stuff and split it over multiple separte classes
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -39,6 +42,9 @@ public:
 
     FileTreeSideWidget* fileTreeSideWidget() const;
 
+    void giveProject( Project* project );
+    Project* project() const;
+
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
@@ -49,6 +55,10 @@ public slots:
     void closeFileWithTabIndex( int idx=-1 );
     bool saveFile();
     bool saveFileAs();
+    bool openProject( const QString& file );
+    bool openProject();
+    bool saveProject();
+    bool saveProjectAs();
 
     void windowNew();
     void windowClose();
@@ -61,11 +71,9 @@ public slots:
     void gotoPrevTab();
     void gotoFile( const QString& file );
 
-
     void encodingChanged();
     void lineEndingChanged();
     void grammarChanged();
-
 
     void editorActionTrigged();
     void updateStateEditorActions();
@@ -76,7 +84,6 @@ protected slots:
     void showFindWidget();
 
     void updateActions();
-
 
 //    void onPaste();
 //    void onCopy();
@@ -118,7 +125,6 @@ private:
     QComboBox* grammarComboRef_;                    ///< The grammar combobox
     QComboBox* lineEndingComboRef_;                 ///< The line-ending combobox
     QComboBox* encodingComboRef_;                   ///< The encodign combobox
-
-    QHash<QString,QAction*> actionMap_;
-
+    QHash<QString,QAction*> actionMap_;             ///< The actionmap with all actions for this window
+    Project* project_;                              ///< The project that's coupled to this window
 };

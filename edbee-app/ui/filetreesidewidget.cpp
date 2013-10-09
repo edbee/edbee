@@ -10,12 +10,14 @@
 #include <QLabel>
 #include <QMenu>
 #include <QPushButton>
+#include <QStringListModel>
 #include <QTreeView>
 #include <QVBoxLayout>
 
 
 #include "application.h"
 #include "filetreesidewidget.h"
+#include "models/project.h"
 #include "QtAwesome.h"
 
 #include "debug.h"
@@ -27,6 +29,7 @@ FileTreeSideWidget::FileTreeSideWidget(QWidget* parent)
     : QWidget(parent)
     , fileTreeModel_(0)
     , fileTreeRef_(0)
+    , projectRef_(0)
 {
     constructUI();
     connectSignals();
@@ -37,6 +40,22 @@ FileTreeSideWidget::FileTreeSideWidget(QWidget* parent)
 FileTreeSideWidget::~FileTreeSideWidget()
 {
     delete fileTreeModel_;
+}
+
+
+/// sets the project
+/// @param project the project that's set
+void FileTreeSideWidget::setProject( Project* project )
+{
+    projectRef_ = project;
+    pathComboRef_->setModel( projectRef_->rootPathList() );
+}
+
+
+/// Returns the project
+Project*FileTreeSideWidget::project() const
+{
+    return projectRef_;
 }
 
 
@@ -136,8 +155,12 @@ void FileTreeSideWidget::setRootPath( const QString& rootPath )
     if( index < 0 ) {
 
         // add the current item
-        pathComboRef_->addItem( rootPath);
-        pathComboRef_->setCurrentIndex( pathComboRef_->count()-1 );
+        QStringListModel* model = projectRef_->rootPathList();
+
+        int idx = model->rowCount() ;
+        model->insertRow( idx );
+        model->setData( model->index(idx), rootPath );
+        pathComboRef_->setCurrentIndex( idx );
 
     } else {
         pathComboRef_->setCurrentIndex(index);
@@ -160,7 +183,7 @@ void FileTreeSideWidget::setRootPathByAction()
 void FileTreeSideWidget::clearCurrentRootPath()
 {
     if( pathComboRef_->currentIndex() > 0 ) {
-        pathComboRef_->removeItem(pathComboRef_->currentIndex());
+        projectRef_->rootPathList()->removeRow( pathComboRef_->currentIndex() );
     }
 }
 
@@ -168,10 +191,8 @@ void FileTreeSideWidget::clearCurrentRootPath()
 /// clear all root paths in the combobox
 /// (It keeps the root path of course)
 void FileTreeSideWidget::clearAllRootPaths()
-{
-    for( int i=pathComboRef_->count()-1; i>= 1; --i ) {
-        pathComboRef_->removeItem(i);
-    }
+{   
+    projectRef_->rootPathList()->removeRows( 1, projectRef_->rootPathList()->rowCount()-1 );
 }
 
 
@@ -180,7 +201,6 @@ void FileTreeSideWidget::constructUI()
 {
     QFont newFont = QFont(font().family(), 10 );
     setFont(newFont);
-
 
     // create the tree model
     fileTreeModel_ = new QFileSystemModel();
@@ -205,12 +225,9 @@ void FileTreeSideWidget::constructUI()
     fileTreeRef_->resizeColumnToContents(0);
     fileTreeRef_->setIndentation(15);
 
-
     // create the combobox with a small trash button
     pathComboRef_ = new QComboBox();
-    pathComboRef_->addItem("/");
     pathComboRef_->setSizePolicy( QSizePolicy::Ignored, QSizePolicy::Preferred );
-
 
     // add trash button
     trashButtonRef_ = new QPushButton();
@@ -225,8 +242,6 @@ void FileTreeSideWidget::constructUI()
     menu->addAction( tr("Clear Current Item"), this, SLOT(clearCurrentRootPath()) );
     menu->addAction( tr("Clear All"), this, SLOT(clearAllRootPaths()) );
     trashButtonRef_->setMenu(menu);
-
-
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setSpacing(0);

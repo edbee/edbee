@@ -9,6 +9,7 @@
 
 class QComboBox;
 class QFileSystemModel;
+class Project;
 class QPushButton;
 class QTreeView;
 
@@ -19,6 +20,9 @@ class FileTreeSideWidget : public QWidget
 public:
     explicit FileTreeSideWidget(QWidget *parent = 0);
     virtual ~FileTreeSideWidget();
+
+    void setProject( Project* project );
+    Project* project() const;
 
     QVariantMap serialize();
     void deserialize( const QVariantMap& map );
@@ -36,7 +40,6 @@ public slots:
     void clearCurrentRootPath();
     void clearAllRootPaths();
 
-
 private:
 
     void constructUI();
@@ -48,4 +51,6 @@ private:
     QTreeView* fileTreeRef_;            ///< A reference to the tree view
     QComboBox* pathComboRef_;           ///< The current path
     QPushButton* trashButtonRef_;       ///< A close button
+
+    Project* projectRef_;               ///< A reference to the project
 };

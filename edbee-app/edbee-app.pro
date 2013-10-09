@@ -24,7 +24,8 @@ SOURCES +=\
     ui/findwidget.cpp \
     models/edbeeconfig.cpp \
     io/sessionserializer.cpp \
-    ui/windowmanager.cpp
+    ui/windowmanager.cpp \
+    models/project.cpp
 
 HEADERS  += \
     ui/mainwindow.h \
@@ -34,7 +35,8 @@ HEADERS  += \
     ui/findwidget.h \
     models/edbeeconfig.h \
     io/sessionserializer.h \
-    ui/windowmanager.h
+    ui/windowmanager.h \
+    models/project.h
 
 
 RESOURCES += \

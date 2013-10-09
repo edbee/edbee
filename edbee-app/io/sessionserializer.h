@@ -10,6 +10,7 @@
 
 class Application;
 class MainWindow;
+class Project;
 
 
 /// The SessionSerializer is used to save/load the application state
@@ -29,12 +30,12 @@ public:
     bool saveState( const QString& fileName );
     bool loadState( const QString& fileName );
 
+    bool saveProject( Project* project );
+    Project* loadProject();
+
     QString errorMessage() const;
 
 protected:
-    QVariantMap serialize();
-    void deserialize( const QVariantMap& map );
-
     QVariantMap serializeApplication( Application* app );
     QVariantMap serializeMainWindow( MainWindow* win );
 
