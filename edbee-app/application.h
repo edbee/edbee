@@ -11,6 +11,8 @@
 class EdbeeConfig;
 class QtAwesome;
 class WindowManager;
+class Workspace;
+
 
 /// The global application for the edbee editor
 class Application : public QApplication
@@ -25,7 +27,6 @@ public:
 
     void loadState();
     void saveState();
-
 
     QtAwesome* qtAwesome() const;
     QFont iconFont( int size=12 ) const;
@@ -45,6 +46,11 @@ public:
     bool isWin();
     const char* osNameString();
 
+    Workspace* workspace() const;
+    void giveWorkspace( Workspace* workspace );
+    void closeWorkspace();
+
+    //bool giveAndSwitchWorkspace( Workspace* workspace );
 
 protected:
     bool event(QEvent* event);
@@ -57,6 +63,7 @@ private:
 
     EdbeeConfig* config_;           ///< The main edbee configuration file
     WindowManager* windowManager_;  ///< The window manager
+    Workspace* workspace_;          ///< The current workspace. At the moment only 1 workspace can be opened. In the future we might support multiple workspace
 };
 
 

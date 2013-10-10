@@ -17,7 +17,7 @@
 
 #include "application.h"
 #include "filetreesidewidget.h"
-#include "models/project.h"
+#include "models/workspace.h"
 #include "QtAwesome.h"
 
 #include "debug.h"
@@ -29,33 +29,36 @@ FileTreeSideWidget::FileTreeSideWidget(QWidget* parent)
     : QWidget(parent)
     , fileTreeModel_(0)
     , fileTreeRef_(0)
-    , projectRef_(0)
+    , rootPathList_(0)
+    , workspaceRef_(0)
 {
     constructUI();
     connectSignals();
+    rootPathList_ = new QStringListModel(QStringList("/"));
 }
 
 
 /// The file tree side widget destructor
 FileTreeSideWidget::~FileTreeSideWidget()
 {
+    delete rootPathList_;
     delete fileTreeModel_;
 }
 
 
 /// sets the project
 /// @param project the project that's set
-void FileTreeSideWidget::setProject( Project* project )
+void FileTreeSideWidget::setWorkspace( Workspace* project )
 {
-    projectRef_ = project;
-    pathComboRef_->setModel( projectRef_->rootPathList() );
+    workspaceRef_ = project;
+    pathComboRef_->setModel( rootPathList_ );
 }
 
 
 /// Returns the project
-Project*FileTreeSideWidget::project() const
+Workspace*FileTreeSideWidget::workspace() const
 {
-    return projectRef_;
+    return workspaceRef_;
 }
 
 
@@ -155,11 +158,9 @@ void FileTreeSideWidget::setRootPath( const QString& rootPath )
     if( index < 0 ) {
 
         // add the current item
-        QStringListModel* model = projectRef_->rootPathList();
-
-        int idx = model->rowCount() ;
-        model->insertRow( idx );
-        model->setData( model->index(idx), rootPath );
+        int idx = rootPathList_->rowCount() ;
+        rootPathList_->insertRow( idx );
+        rootPathList_->setData( rootPathList_->index(idx), rootPath );
         pathComboRef_->setCurrentIndex( idx );
 
     } else {
@@ -183,7 +184,7 @@ void FileTreeSideWidget::setRootPathByAction()
 void FileTreeSideWidget::clearCurrentRootPath()
 {
     if( pathComboRef_->currentIndex() > 0 ) {
-        projectRef_->rootPathList()->removeRow( pathComboRef_->currentIndex() );
+        rootPathList_->removeRow( pathComboRef_->currentIndex() );
     }
 }
 
@@ -192,7 +193,7 @@ void FileTreeSideWidget::clearCurrentRootPath()
 /// (It keeps the root path of course)
 void FileTreeSideWidget::clearAllRootPaths()
 {   
-    projectRef_->rootPathList()->removeRows( 1, projectRef_->rootPathList()->rowCount()-1 );
+    rootPathList_->removeRows( 1, rootPathList_->rowCount()-1 );
 }
 
 

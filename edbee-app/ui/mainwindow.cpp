@@ -39,8 +39,9 @@
 #include "filetreesidewidget.h"
 #include "findwidget.h"
 #include "gotowidget.h"
+#include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
-#include "models/project.h"
+#include "models/workspace.h"
 #include "ui/windowmanager.h"
 
 #include "debug.h"
@@ -52,7 +53,7 @@ static const int FileSizeWarning = 1024*1024*20;  // Larger then 20 MB give a wa
 
 
 /// Constructor for a main application windows
-MainWindow::MainWindow(QWidget* parent)
+MainWindow::MainWindow(Workspace* workspace, QWidget* parent)
     : QMainWindow(parent)
     , fileTreeSideWidgetRef_(0)
     , tabWidgetRef_(0)
@@ -60,21 +61,19 @@ MainWindow::MainWindow(QWidget* parent)
     , grammarComboRef_(0)
     , lineEndingComboRef_(0)
     , encodingComboRef_(0)
-    , project_(0)
+    , workspaceRef_(0)
 {
-
     constructActions();
     constructUI();
     constructMenu();
     connectSignals();
-    giveProject( new Project() );
+    setWorkspace( workspace );
 }
 
 
 /// The application destructor
 MainWindow::~MainWindow()
 {    
-    delete project_;
     qDeleteAll(actionMap_);
 }
 
@@ -137,20 +136,19 @@ FileTreeSideWidget* MainWindow::fileTreeSideWidget() const
 }
 
 
-/// Gives the project
-/// @param project
-void MainWindow::giveProject(Project* project)
+/// Sets the current workspace
+/// @param workspace the assign this window to
+void MainWindow::setWorkspace(Workspace* workpace)
 {
-    delete project_;
-    project_ = project;
-    fileTreeSideWidgetRef_->setProject( project );
+    workspaceRef_ = workpace;
+    fileTreeSideWidgetRef_->setWorkspace( workpace );
 }
 
 
-/// Returns the current project
-Project*MainWindow::project() const
+/// Returns the current workspace
+Workspace* MainWindow::workspace() const
 {
-    return project_;
+    return workspaceRef_;
 }
 
 
@@ -304,7 +302,7 @@ bool MainWindow::saveFile()
 
     edbee::TextDocumentSerializer serializer( widget->textDocument() );
     if( !serializer.save( &file ) ) {
-        QMessageBox::warning(this, tr("Error saving file"), tr("Error savingfile:\n%1").arg(serializer.errorString()) );
+        QMessageBox::warning(this, tr("Error saving file"), tr("Error saving file %1:\n%2").arg(fileName).arg(serializer.errorString()) );
         return false;
     }
 
@@ -331,56 +329,123 @@ bool MainWindow::saveFileAs()
 }
 
 
-/// Opens the given project
-/// @param file the file of the project
-bool MainWindow::openProject( const QString& file )
+/// Creates a blank workspace without filename.
+/// At the moment it closes all other windows and files
+void MainWindow::newWorkspace()
 {
-    /// TODO Implement this
+    qApp->setQuitOnLastWindowClosed(false);    // disable auto application quit on closing last window
 
-    return false;
+    // close the current workspace
+    edbeeApp()->closeWorkspace();
+
+    // create a new workspace
+    Workspace* workspace = new Workspace();
+    edbeeApp()->giveWorkspace( workspace );
+    edbeeApp()->windowManager()->createAndShowWindowIfEmpty();  // make sure at least one window is available
+
+    // re-enable quit on close
+    qApp->setQuitOnLastWindowClosed(true);
 }
 
 
-/// open the project and shows a dialog
-bool MainWindow::openProject()
+/// Opens the given workspace
+/// @param file the file of the workspace
+bool MainWindow::openWorkspace( const QString& fileName )
 {
-
     /// TODO Implement this
+    QFileInfo fileInfo(fileName);
 
-    return false;
-}
-
-
-/// Saves the current project
-bool MainWindow::saveProject()
-{
-    if( !project_ ) {
-        return saveProjectAs();
+    // file not found ??
+    if( !fileInfo.exists() ) {
+        QMessageBox::warning(this, tr("File not found"), tr("The file could not be found!)") );
+        return false;
     }
 
-    /// TODO Implement this
+    // file not readable?
+    if( !fileInfo.isReadable() ) {
+        QMessageBox::warning(this, tr("File not accessible"), tr("The file could not be read!)") );
+        return false;
+    }
+
+    // close the current workspace
+    edbeeApp()->setQuitOnLastWindowClosed(false);
+    edbeeApp()->closeWorkspace();
+
+    // create the widget and serialize the file
+    WorkspaceSerializer serializer;
+    serializer.loadWorkspace( fileName );
+
+    // make sure there's always a single window
+    edbeeApp()->windowManager()->createAndShowWindowIfEmpty();
+    edbeeApp()->setQuitOnLastWindowClosed(true);
+
+    return true;
+}
 
 
+/// open the workspace and shows a dialog
+/// @returns false on error or if no file is selected
+bool MainWindow::openWorkspace()
+{
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Openen Workspace"),   // title
+        QString(),              // current path
+        Workspace::fileDialogFilter()
+    );
+    if( !fileName.isEmpty() ) {
+        return openWorkspace(fileName);
+    }
     return false;
 }
 
 
-/// Saves the current project as a given name
-bool MainWindow::saveProjectAs()
+/// Saves the current workspace
+/// @returns true on success false on error
+bool MainWindow::saveWorkspace()
+{
+    // when no file has been given show a file-chooser
+    if( workspaceRef_->filename().isEmpty() ) {
+        return saveWorkspaceAs();
+    }
+
+    // serialize the workspace
+    WorkspaceSerializer serializer;
+    if( !serializer.saveWorkspace( workspaceRef_ ) ) {
+        QMessageBox::warning(this, tr("Error saving workspace"), tr("Error saving workspace %1:\n%2").arg(workspaceRef_->filename()).arg(serializer.errorMessage()) );
+        return false;
+    }
+    return true;
+}
+
+
+/// Saves the current workspace as a given name
+bool MainWindow::saveWorkspaceAs()
 {
     // show the file dialog
-    QString filename = QFileDialog::getSaveFileName( this, tr("Save project as") );
+    QFileDialog dlg(this, tr("Save workspace as"), QString(), Workspace::fileDialogFilter() );
+    dlg.setWindowModality( Qt::WindowModal );
+    dlg.setAcceptMode( QFileDialog::AcceptSave );
+    if( !workspaceRef_->filename().isEmpty() ) {       // set the inital selection
+        dlg.selectFile( workspaceRef_->filename() );
+    }
+
+    // show the dialog
+    if( !dlg.exec() ) {
+        return false;
+    }
+
+    // retrieve the selected filename
+    QString filename =dlg.selectedFiles().first();
     if( filename.isEmpty() ) { return false; }
 
-    QScopedPointer<Project> oldProject(project_);
+    QString oldFilename = workspaceRef_->filename();
 
-    // create a new project
-    project_ = new Project( project_ );
-    project_->setFilename( filename );
-    if( saveFile() ) {
+    // create a new workspace
+    workspaceRef_->setFilename( filename );
+    if( saveWorkspace() ) {
         return true;
     }
-    oldProject.reset(); // do not delete the old porject
+    workspaceRef_->setFilename( oldFilename );
     return false;
 }
 
@@ -388,7 +453,7 @@ bool MainWindow::saveProjectAs()
 /// opens a new window
 void MainWindow::windowNew()
 {
-    edbeeApp()->windowManager()->createWindow()->show();
+    edbeeApp()->windowManager()->createWindow( edbeeApp()->workspace() )->show();
 }
 
 
@@ -726,9 +791,10 @@ void MainWindow::constructActions()
     createAction( "goto.prev_tab", tr("Previous Tab"), QKeySequence::PreviousChild, this, SLOT(gotoPrevTab()) );
     createAction( "goto.next_tab", tr("Next Tab"), QKeySequence::NextChild, this, SLOT(gotoNextTab()) );
 
-    createAction( "project.open", tr("&Open Project..."), QKeySequence(), this, SLOT(openProject()) );
-    createAction( "project.save", tr("Save Project"), QKeySequence(), this, SLOT(saveProject()) );
-    createAction( "project.save_as", tr("&Save Project As..."), QKeySequence(), this, SLOT(saveProjectAs()) );
+    createAction( "workspace.new", tr("&New Workspace"), QKeySequence(), this, SLOT(newWorkspace()) );
+    createAction( "workspace.open", tr("&Open Workspace..."), QKeySequence(), this, SLOT(openWorkspace()) );
+    createAction( "workspace.save", tr("Save Workspace"), QKeySequence(), this, SLOT(saveWorkspace()) );
+    createAction( "workspace.save_as", tr("&Save Workspace As..."), QKeySequence(), this, SLOT(saveWorkspaceAs()) );
 
     createAction("win.new", tr("&New Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_N ), this, SLOT(windowNew() ) );
     createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(windowClose() ) );
@@ -751,6 +817,7 @@ void MainWindow::constructActions()
 void MainWindow::constructUI()
 {
     this->setWindowTitle( qApp->applicationDisplayName() );
+
 
     // statusbar
     QFont font = QFont(statusBar()->font().family(), 10 );
@@ -874,10 +941,13 @@ void MainWindow::constructMenu()
     gotoMenu->addAction( action("goto.prev_tab"));
     gotoMenu->addAction( action("goto.next_tab"));
 
-    QMenu* projectMenu = menuBar()->addMenu("&Project");
-    projectMenu->addAction( action("project.open") );
-    projectMenu->addAction( action("project.save") );
-    projectMenu->addAction( action("project.save_as") );
+    QMenu* workspaceMenu = menuBar()->addMenu("Workspace");
+    workspaceMenu->addAction( action("workspace.new") );
+    workspaceMenu->addSeparator();
+    workspaceMenu->addAction( action("workspace.open") );
+    workspaceMenu->addSeparator();
+    workspaceMenu->addAction( action("workspace.save") );
+    workspaceMenu->addAction( action("workspace.save_as") );
 
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
     windowMenu->addAction( action("win.minimize"));

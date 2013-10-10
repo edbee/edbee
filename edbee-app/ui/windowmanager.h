@@ -8,6 +8,7 @@
 #include <QObject>
 
 class MainWindow;
+class Workspace;
 
 /// Manages the windows the edbee app is using
 class WindowManager : public QObject
@@ -17,10 +18,14 @@ public:
     explicit WindowManager(QObject *parent = 0);
     virtual ~WindowManager();
 
-    MainWindow* createWindow();
+    MainWindow* createWindow(Workspace* workspace);
+    void createAndShowWindowIfEmpty();
 
     int windowCount() const;
     MainWindow* window( int idx ) const;
+
+    bool closeAllForWorkspace( Workspace* workspace );
+    bool closeAll();
 
 protected slots:
     

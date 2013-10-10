@@ -15,8 +15,9 @@
 #include "edbee/io/tmlanguageparser.h"
 #include "edbee/edbee.h"
 #include "edbee/views/texttheme.h"
-#include "io/sessionserializer.h"
+#include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
+#include "models/workspace.h"
 #include "QtAwesome.h"
 #include "ui/mainwindow.h"
 #include "ui/windowmanager.h"
@@ -31,15 +32,19 @@ Application::Application(int& argc, char** argv )
     : QApplication( argc, argv )
     , qtAwesome_(0)
     , config_(0)
+    , workspace_(0)
 {
     config_ = new EdbeeConfig();
     windowManager_ = new WindowManager();
+    workspace_ = new Workspace();
 //    connect( this, &Application::aboutToQuit, this, &Application::shutdown );
 }
+
 
 /// destruct the 'owned' objects
 Application::~Application()
 {
+    delete workspace_;
     delete windowManager_;
     delete config_;
     delete qtAwesome_;
@@ -52,8 +57,6 @@ void Application::initApplication()
     // Initialize the application paths
     #ifdef Q_OS_MAC
         appDataPath_    = applicationDirPath() + "/../Resources/";
-
-
     #else
         appDataPath_ = qApp->applicationDirPath() + "/data/";
     #endif
@@ -78,7 +81,6 @@ void Application::initApplication()
     config()->addFile( QString("%1%2").arg(userConfigPath()).arg("default.json"), EdbeeConfig::AutoCreate );
     config()->addFile( QString("%1%2").arg(userConfigPath()).arg( QString("default.%1.json").arg(osNameString()) ), EdbeeConfig::Optional );
 
-
     // load the configuration
     if( !config()->loadConfig() ) {
 
@@ -97,6 +99,7 @@ void Application::initApplication()
         }
     }
 
+
     // make qtawesome
     qtAwesome_ = new QtAwesome( this);
     qtAwesome_->initFontAwesome();
@@ -106,10 +109,9 @@ void Application::initApplication()
     loadState();
 
     // Make sure there's always a window open
-    if( windowManager()->windowCount() == 0 ) {
-        windowManager()->createWindow()->show();
-    }
+    windowManager()->createAndShowWindowIfEmpty();
 }
+
 
 /// thsi method shutsdown the application
 void Application::shutdown()
@@ -117,25 +119,28 @@ void Application::shutdown()
 
 }
 
+
 /// Loads the last state of the application
 void Application::loadState()
 {
-    SessionSerializer io;
+    WorkspaceSerializer io;
     if( !io.loadState(lastSessionFilename()) ) {
         qlog_warn() << "Error restoring session state to " << lastSessionFilename();
     }
 }
+
 
 /// This method saves the application state to the last session
 /// When re-opening edbee the state is restored again
 void Application::saveState()
 {
     // serialize the previous state.
-    SessionSerializer io;
+    WorkspaceSerializer io;
     if( !io.saveState(lastSessionFilename()) ) {
         qlog_warn() << "Error saving session state to " << lastSessionFilename();
     }
 }
+
 
 /// returns the qtAwesome instance for the application's icons
 QtAwesome *Application::qtAwesome() const
@@ -143,11 +148,13 @@ QtAwesome *Application::qtAwesome() const
     return qtAwesome_;
 }
 
+
 /// Returns the (default) icon font
 QFont Application::iconFont(int size) const
 {
     return qtAwesome()->font(size);
 }
+
 
 /// Returns the application data path.
 /// This is the path to fixed application resources
@@ -157,11 +164,13 @@ QString Application::appDataPath() const
     return appDataPath_;
 }
 
+
 /// Returns tha full application coniguration path
 QString Application::appConfigPath() const
 {
     return QString("%1%2/").arg(appDataPath()).arg("config");
 }
+
 
 /// Returns the user config data path. This is the data path where user specific
 /// settings are stored
@@ -170,11 +179,13 @@ QString Application::userDataPath() const
     return userDataPath_;
 }
 
+
 /// Returns the full user configuration path
 QString Application::userConfigPath() const
 {
     return QString("%1%2/").arg(userDataPath()).arg("config");
 }
+
 
 /// Returns the filename that used to store/load the last session state
 QString Application::lastSessionFilename() const
@@ -189,11 +200,13 @@ EdbeeConfig* Application::config() const
     return config_;
 }
 
+
 /// Returns the application window manager
 WindowManager* Application::windowManager() const
 {
     return windowManager_;
 }
+
 
 /// This method returnst true if we're running on Mac OS X
 /// Note: I could have used macro's but that will probably litter the application with #ifdefs
@@ -207,6 +220,7 @@ bool Application::isOSX()
 #endif
 }
 
+
 /// This method reutrns true if we're running on a Unix X11 environment
 bool Application::isX11()
 {
@@ -217,6 +231,7 @@ bool Application::isX11()
 #endif
 }
 
+
 /// Returns true if the current environment is windows
 bool Application::isWin()
 {
@@ -226,6 +241,7 @@ bool Application::isWin()
     return false;
 #endif
 }
+
 
 /// This method returns the operatingsystem string
 /// that's can be used as prefix/postfix items in config-settings
@@ -240,6 +256,60 @@ const char *Application::osNameString()
 #endif
 
 }
+
+
+/// This method returns the current workspace
+Workspace* Application::workspace() const
+{
+    return workspace_;
+}
+
+
+/// Gives the workspace to the application
+/// replacing the other workspace
+/// @param workspace the new workspace to use
+void Application::giveWorkspace(Workspace* workspace)
+{
+    // has the workspace been changed
+    if( workspace != workspace_ ) {
+        delete workspace_;
+        workspace_ = workspace;
+
+    // assigning the same workspace again is a design flaw!
+    } else {
+        qlog_warn() << "Hmm.. assigning the same workspace again !!";
+        Q_ASSERT(false);
+    }
+}
+
+
+/// Closes the current workspace
+/// This does NOT destroy the current workspace
+void Application::closeWorkspace()
+{
+    windowManager()->closeAllForWorkspace( workspace_ );
+}
+
+
+/*
+/// Sets the current workspace
+bool Application::giveAndSwitchWorkspace(Workspace* workspace)
+{
+    qApp->setQuitOnLastWindowClosed(false);
+    // close the active workpace
+    if( workspace_ ) {
+        if( !windowManager()->closeAllForWorkspace( workspace_ )) {
+            qApp->setQuitOnLastWindowClosed(true);
+            return false;
+        }
+        delete workspace_;
+    }
+    // set the new workspace
+    workspace_ = workspace;
+    qApp->setQuitOnLastWindowClosed(true);
+    return true;
+}
+*/
 
 
 /// This is the place where all (application) events pass by

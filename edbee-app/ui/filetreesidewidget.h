@@ -9,9 +9,10 @@
 
 class QComboBox;
 class QFileSystemModel;
-class Project;
 class QPushButton;
+class QStringListModel;
 class QTreeView;
+class Workspace;
 
 /// the side tree widget
 class FileTreeSideWidget : public QWidget
@@ -21,8 +22,8 @@ public:
     explicit FileTreeSideWidget(QWidget *parent = 0);
     virtual ~FileTreeSideWidget();
 
-    void setProject( Project* project );
-    Project* project() const;
+    void setWorkspace( Workspace* workspace );
+    Workspace* workspace() const;
 
     QVariantMap serialize();
     void deserialize( const QVariantMap& map );
@@ -52,5 +53,7 @@ private:
     QComboBox* pathComboRef_;           ///< The current path
     QPushButton* trashButtonRef_;       ///< A close button
 
-    Project* projectRef_;               ///< A reference to the project
+    QStringListModel* rootPathList_;    ///< The list with all root pathnames
+
+    Workspace* workspaceRef_;           ///< A reference to the project
 };

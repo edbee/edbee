@@ -17,7 +17,7 @@ class QTreeView;
 
 class Application;
 class FileTreeSideWidget;
-class Project;
+class Workspace;
 
 
 namespace edbee {
@@ -31,7 +31,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow( Workspace* workspace, QWidget* parent = 0 );
     virtual ~MainWindow();
 
     int tabCount() const;
@@ -42,12 +42,13 @@ public:
 
     FileTreeSideWidget* fileTreeSideWidget() const;
 
-    void giveProject( Project* project );
-    Project* project() const;
+    void setWorkspace(Workspace* workpace );
+    Workspace* workspace() const;
 
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
+
     void openFile( const QString& file );
     void openFile();
     void newFile();
@@ -55,10 +56,12 @@ public slots:
     void closeFileWithTabIndex( int idx=-1 );
     bool saveFile();
     bool saveFileAs();
-    bool openProject( const QString& file );
-    bool openProject();
-    bool saveProject();
-    bool saveProjectAs();
+
+    void newWorkspace();
+    bool openWorkspace(const QString& fileName );
+    bool openWorkspace();
+    bool saveWorkspace();
+    bool saveWorkspaceAs();
 
     void windowNew();
     void windowClose();
@@ -126,5 +129,5 @@ private:
     QComboBox* lineEndingComboRef_;                 ///< The line-ending combobox
     QComboBox* encodingComboRef_;                   ///< The encodign combobox
     QHash<QString,QAction*> actionMap_;             ///< The actionmap with all actions for this window
-    Project* project_;                              ///< The project that's coupled to this window
+    Workspace* workspaceRef_;                       ///< The workspace this window belongs to
 };

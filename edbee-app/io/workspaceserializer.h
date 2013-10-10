@@ -10,36 +10,35 @@
 
 class Application;
 class MainWindow;
-class Project;
+class Workspace;
 
 
-/// The SessionSerializer is used to save/load the application state
+/// The WorkspaceSerializer is used to save/load the workspace state
 /// The state is stored as a plain json file
 ///
-/// This is to 'remember' the last opened state of the application, and can be used
-/// in the future to store the application state in a seperate session file
+/// This is to 'remember' the last opened state of the current workspace.
 ///
 /// I decided to not make a 'serializable' interface to offload the serialization complexibility
 /// into this class. When serialization of certain objects gets complex seperate classes should be made
-class SessionSerializer
+class WorkspaceSerializer
 {
 public:
-    SessionSerializer();
-    virtual ~SessionSerializer();
+    WorkspaceSerializer();
+    virtual ~WorkspaceSerializer();
 
     bool saveState( const QString& fileName );
     bool loadState( const QString& fileName );
 
-    bool saveProject( Project* project );
-    Project* loadProject();
+    bool saveWorkspace( Workspace* project );
+    Workspace* loadWorkspace( const QString& fileName );
 
     QString errorMessage() const;
 
 protected:
-    QVariantMap serializeApplication( Application* app );
-    QVariantMap serializeMainWindow( MainWindow* win );
+    QVariantMap serializeWorkspace( Workspace* workspace );
+    void deserializeWorkspace( Workspace* workspace, const QVariantMap& map);
 
-    void deserializeApplication( Application* app, const QVariantMap& map);
+    QVariantMap serializeMainWindow( MainWindow* win );
     void deserializeMainWindow( MainWindow* win, const QVariantMap& map);
 
 private:
