@@ -19,7 +19,9 @@ Using the component is pretty easy. First you must setup the edbee environment.
 This process is required to make the library know the location of the settings
 files:
 
-```
+```C++
+#include "edbee/edbee.h"
+
 // get the edbee instance
 edbee::Edbee* tm = edbee::Edbee::instance();
 
@@ -41,13 +43,16 @@ tm->autoShutDownOnAppExit();
 After that you're ready to go.
 You can create a widget like this:
 
-```
+```C++
 edbee::TextEditorWidget* widget =  new edbee::TextEditorWidget();
 ```
 
 Of course it would also be nice to fill the editor with a file. you can use the included serializer for this.
 
-```
+```C++
+#include "edbee/io/textdocumentserializer.h"
+#include "edbee/texteditorwidget.h"
+
 edbee::TextEditorWidget* widget =  new edbee::TextEditorWidget();
 edbee::TextDocumentSerializer serializer( widget->textDocument() );
 if( !serializer.load( "your-filename.rb" ) ) {
@@ -55,6 +60,22 @@ if( !serializer.load( "your-filename.rb" ) ) {
 }
 
 ```
+
+After loading the textfile it is nice to detect the grammar/language of this file.
+The edbee library uses an extension based file-type detection. Of course you can also plugin your own.
+
+```C++
+#include "edbee/edbee.h"
+#include "edbee/models/textdocument.h"
+#include "edbee/models/textgrammar.h"
+#include "edbee/texteditorwidget.h"
+
+TextGrammarManager* grammarManager = edbee::Edbee::instance()->grammarManager();
+TextGrammar* grammar = grammarManager->detectGrammarWithFilename( "a-ruby-file.rb" );
+widget->textDocument()->setLanguagGrammar( grammar );
+
+```
+
 
 
 Known Issues and Missing Features
