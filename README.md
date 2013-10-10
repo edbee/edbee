@@ -52,7 +52,6 @@ edbee::TextEditorWidget* widget =  new edbee::TextEditorWidget();
 edbee::TextDocumentSerializer serializer( widget->textDocument() );
 if( !serializer.load( "your-filename.rb" ) ) {
     QMessageBox::warning(this, tr("Error opening file"), tr("Error opening file!\n%1").arg(serializer.errorString()) );
-    delete widget;
 }
 
 ```
