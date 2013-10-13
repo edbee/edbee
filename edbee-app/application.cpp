@@ -137,7 +137,14 @@ void Application::saveState()
     // serialize the previous state.
     WorkspaceSerializer io;
     if( !io.saveState(lastSessionFilename()) ) {
-        qlog_warn() << "Error saving session state to " << lastSessionFilename();
+        qlog_warn() << "Error saving session state to " << lastSessionFilename() << ": " << io.errorMessage();
+    }
+
+    // when there's a filename in the workspace state. Also save that filename
+    if( !workspace()->filename().isEmpty() ) {
+        if( !io.saveWorkspace( workspace() ) ) {
+            qlog_warn() << "Error saving workspace " << workspace()->filename() << ": " << io.errorMessage();
+        }
     }
 }
 
