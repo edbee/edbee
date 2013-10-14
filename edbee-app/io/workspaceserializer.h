@@ -12,6 +12,10 @@ class Application;
 class MainWindow;
 class Workspace;
 
+namespace edbee {
+    class TextEditorWidget;
+}
+
 
 /// The WorkspaceSerializer is used to save/load the workspace state
 /// The state is stored as a plain json file
@@ -40,6 +44,8 @@ protected:
 
     QVariantMap serializeMainWindow( MainWindow* win );
     void deserializeMainWindow( MainWindow* win, const QVariantMap& map);
+
+    QVariantMap serializeEditorTab( edbee::TextEditorWidget* widget );
 
 private:
     QString errorMessage_;                   ///< The last error message

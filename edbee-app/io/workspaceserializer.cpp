@@ -9,7 +9,16 @@
 #include <QJsonObject>
 
 #include "application.h"
+#include "edbee/models/textdocument.h"
+#include "edbee/models/textgrammar.h"
+#include "edbee/models/textlexer.h"
+#include "edbee/lexers/grammartextlexer.h"
 #include "edbee/io/jsonparser.h"
+#include "edbee/texteditorwidget.h"
+#include "edbee/util/textcodec.h"
+#include "edbee/views/textrenderer.h"
+#include "edbee/views/textselection.h"
+
 #include "models/workspace.h"
 #include "ui/mainwindow.h"
 #include "ui/filetreesidewidget.h"
@@ -210,15 +219,16 @@ QVariantMap WorkspaceSerializer::serializeMainWindow(MainWindow* win)
     // 'remeber' all open files
     QVariantList tabs;
     for( int i=0,cnt=win->tabCount(); i<cnt; ++i ) {
-        QVariantMap tab;
+        QVariantMap tab = serializeEditorTab( win->tabEditor(i) );
+
+        // add the file
         tab.insert("file",win->tabFilename(i));
+
+        // add the active tab index
         if( win->activeTabIndex() == i ) {
-            tab.insert("active",1);
+            result.insert("active",1);
         }
 
-        /// (TODO: Add line/column scroll information of the given tab!)
-        //  edbee::TextEditorWidget* widget = win->tabEditor(i);
-        //  tab.insert("caret",)
         tabs.push_back(tab);
     }
     result.insert("tabs",tabs);
@@ -263,6 +273,42 @@ void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantM
 
     // update the side tree
     win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
+}
+
+
+/// Serializes the editor tab
+/// @param widget the widget that needs to be serialized
+/// @return the serialized variant map
+QVariantMap WorkspaceSerializer::serializeEditorTab(edbee::TextEditorWidget* editor)
+{
+    QVariantMap result;
+
+    // serialize the encoding
+    edbee::TextDocument* doc = editor->textDocument();
+    result.insert("encoding", doc->encoding()->name() );
+
+    // add the active grammer
+    edbee::TextLexer* lexer = doc->textLexer();
+
+    // Yuck, this is dirty, we need a nice way to do this
+    edbee::GrammarTextLexer* grammarLexer = dynamic_cast<edbee::GrammarTextLexer*>(lexer) ;
+    if( grammarLexer ) {
+        edbee::TextGrammar* grammar = grammarLexer->grammar();
+        if( grammar ) {
+            result.insert("grammar", grammar->name() );
+        }
+    }
+
+    // add the scroll position
+    result.insert("scroll", editor->textRenderer()->firstVisibleLine() );
+
+    // add the active line and colum
+    // we do not store alle ranges!! This is confusing when opening the file
+    // only the first caret is stored!
+    const edbee::TextRange& range = editor->textSelection()->range(0);
+    result.insert("caret", range.caret() );
+
+    return result;
 }
 
 
