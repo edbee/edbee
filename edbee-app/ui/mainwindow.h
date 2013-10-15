@@ -49,7 +49,7 @@ public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
 
-    void openFile( const QString& file );
+    bool openFile(const QString& filename );
     void openFile();
     void newFile();
     void addEditorTab( edbee::TextEditorWidget* editor, const QString& fileName );

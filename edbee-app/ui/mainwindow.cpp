@@ -183,31 +183,32 @@ void MainWindow::openDir(const QString& path)
 
 
 /// Opens the given file in the editor window
-void MainWindow::openFile(const QString& fileName)
+/// @param filename the filename to open
+bool MainWindow::openFile(const QString& filename)
 {
-    QFileInfo fileInfo(fileName);
+    QFileInfo fileInfo(filename);
 
     // file not found ??
     if( !fileInfo.exists() ) {
         QMessageBox::warning(this, tr("File not found"), tr("The file could not be found!)") );
-        return;
+        return false;
     }
 
     // file not readable?
     if( !fileInfo.isReadable() ) {
         QMessageBox::warning(this, tr("File not accessible"), tr("The file could not be read!)") );
-        return;
+        return false;
     }
 
     // safeguard for large files
     if( fileInfo.size() >= FileSizeWarning ) {
         if( QMessageBox::question(this, tr("Open very large file?"), tr("Warning file is larger then %1 MB. Open file?").arg(FileSizeWarning/1024/1024) ) != QMessageBox::Yes ) {
-            return;
+            return false;
         }
     }
 
     // open the file
-    QFile file(fileName);
+    QFile file(filename);
 
     // create the widget and serialize the file
     edbee::TextEditorWidget* widget = createEditorWidget();
@@ -215,9 +216,10 @@ void MainWindow::openFile(const QString& fileName)
     if( !serializer.load( &file ) ) {
         QMessageBox::warning(this, tr("Error opening file"), tr("Error opening file:\n%1").arg(serializer.errorString()) );
         delete widget;
-        return;
+        return false;
     }
     addEditorTab( widget, fileInfo.filePath() );
+    return true;
 }
 
 

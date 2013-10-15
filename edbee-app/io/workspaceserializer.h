@@ -46,6 +46,7 @@ protected:
     void deserializeMainWindow( MainWindow* win, const QVariantMap& map);
 
     QVariantMap serializeEditorTab( edbee::TextEditorWidget* widget );
+    void deserializeEditorTab( edbee::TextEditorWidget* widget, const QVariantMap& map );
 
 private:
     QString errorMessage_;                   ///< The last error message

@@ -9,6 +9,7 @@
 #include <QJsonObject>
 
 #include "application.h"
+#include "edbee/edbee.h"
 #include "edbee/models/textdocument.h"
 #include "edbee/models/textgrammar.h"
 #include "edbee/models/textlexer.h"
@@ -226,7 +227,7 @@ QVariantMap WorkspaceSerializer::serializeMainWindow(MainWindow* win)
 
         // add the active tab index
         if( win->activeTabIndex() == i ) {
-            result.insert("active",1);
+            tab.insert("active",1);
         }
 
         tabs.push_back(tab);
@@ -241,6 +242,8 @@ QVariantMap WorkspaceSerializer::serializeMainWindow(MainWindow* win)
 
 
 /// deserializes the map to configure this main window
+/// @param win the window to configure
+/// @param map the map with the serialized data
 void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantMap& map)
 {
     // reposition all windows
@@ -260,11 +263,17 @@ void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantM
         QVariantMap tabMap = tabVar.toMap();
         QString file = tabMap.value("file").toString();
         bool active = tabMap.value("active").toInt() != 0;
+
+        // open the file if it exists
         if( !file.isEmpty() && QFile::exists(file)) {
             if( active ) {
                 activeIndex = win->tabCount();
             }
-            win->openFile( file );
+
+            // open the file and derialize the extra document information
+            if( win->openFile( file ) ) {
+                deserializeEditorTab( win->tabEditor( win->tabCount()-1), tabMap);
+            }
         }
     }
 
@@ -309,6 +318,49 @@ QVariantMap WorkspaceSerializer::serializeEditorTab(edbee::TextEditorWidget* edi
     result.insert("caret", range.caret() );
 
     return result;
+}
+
+
+/// deserializes the editor tab settings
+/// @param widget the widget to serialize the data to
+/// @param map the map with options to deserialize
+void WorkspaceSerializer::deserializeEditorTab(edbee::TextEditorWidget* editor, const QVariantMap& map)
+{
+    // retrieve some ed
+    edbee::TextDocument* doc = editor->textDocument();
+    edbee::Edbee* edbee = edbee::Edbee::instance();
+
+    // select the correct textencoding
+    edbee::TextCodec* codec = edbee->codecManager()->codecForName( map.value("encoding").toString() );
+    if( codec ) {
+        doc->setEncoding( codec );
+    }
+
+    // select the grammar
+    edbee::TextLexer* lexer = doc->textLexer();
+
+    // TODO we need a cleaner way to do this
+    edbee::GrammarTextLexer* grammarLexer = dynamic_cast<edbee::GrammarTextLexer*>(lexer) ;
+    if( grammarLexer ){
+        edbee::TextGrammar* grammar = edbee->grammarManager()->get( map.value("grammar").toString() );
+        if( grammar ) {
+            grammarLexer->setGrammar( grammar );
+        }
+    }
+
+    // restore the scroll position
+    int line = map.value("scroll").toInt();
+    if( line > 0 && line < doc->lineCount() ) {
+        // editor->scrollTopToLine( line );         // Yuck, somehow the scroll-dimensions aren't ready at this moment so changing scroll-position doesn't work
+        QMetaObject::invokeMethod( editor, "scrollTopToLine", Qt::QueuedConnection, Q_ARG(int,line) );  // work-around is to post a scroll event
+    }
+
+    // restore the caret position
+    // only 1 caret position is stored. Starting an editor with multi-carets is not something you'de expect!
+    int caret = map.value("caret").toInt();
+    if( caret >= 0 && caret <= doc->length() ) {
+        editor->textSelection()->setRange(caret,caret);
+    }
 }
 
 
