@@ -709,6 +709,7 @@ void MainWindow::updateActions()
 void MainWindow::updateRecentWorkspaceMenuItems()
 {
     // remove all existing menu items (perhaps, we should delete the actions)
+    qDeleteAll(recentItemsMenuRef_->actions()); // I need to remove all actions, else they will stay alive till the end of the current window
     recentItemsMenuRef_->clear();
 
     // add all recent files
@@ -726,8 +727,8 @@ void MainWindow::updateRecentWorkspaceMenuItems()
     /// Add the clear recent workspace list action
     recentItemsMenuRef_->addSeparator();
     QAction* clearListAction = new QAction( tr("Clear List"), recentItemsMenuRef_);
+    connect( clearListAction, &QAction::triggered, edbeeApp(), &Application::clearRecentWorkspaceFilenameList );
     recentItemsMenuRef_->addAction( clearListAction );
-
 }
 
 

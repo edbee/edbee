@@ -334,7 +334,7 @@ QStringList Application::recentWorkspaceFilenameList() const
 /// clears the recent workspace filename list
 void Application::clearRecentWorkspaceFilenameList()
 {
-    recentWorkspaceFilenameList().clear();
+    recentWorkspaceFilenameList_.clear();
     // notify the list has changed
     emit recentWorkspaceFilenameListChanged();
 }
