@@ -104,7 +104,6 @@ void Application::initApplication()
     qtAwesome_ = new QtAwesome( this);
     qtAwesome_->initFontAwesome();
 
-
     // restore the last state
     loadState();
 
@@ -287,6 +286,11 @@ void Application::giveWorkspace(Workspace* workspace)
         qlog_warn() << "Hmm.. assigning the same workspace again !!";
         Q_ASSERT(false);
     }
+
+    // when adding a workspace with a filename add the workspace to the recent workspace list
+    if( !workspace->filename().isEmpty() ) {
+        this->addToRecentWorkspaceFilenameList( workspace->filename() );
+    }
 }
 
 
@@ -295,6 +299,44 @@ void Application::giveWorkspace(Workspace* workspace)
 void Application::closeWorkspace()
 {
     windowManager()->closeAllForWorkspace( workspace_ );
+    // notify the list has changed
+    emit recentWorkspaceFilenameListChanged();
+}
+
+
+/// Adds the given filename to the recent workspace filename list
+/// @param filename the filename to add to the list
+void Application::addToRecentWorkspaceFilenameList(const QString& filename)
+{
+    recentWorkspaceFilenameList_.removeOne( filename );
+    recentWorkspaceFilenameList_.push_front( filename );
+    // notify the list has changed
+    emit recentWorkspaceFilenameListChanged();
+}
+
+
+/// changes the recent workspace filename list to the given stringlist
+/// @param filenameList the list of new filename
+void Application::setRecentWorkspaceFilenameList(const QStringList& filenameList)
+{
+    recentWorkspaceFilenameList_ = filenameList;
+    emit recentWorkspaceFilenameListChanged();
+}
+
+
+/// Returns the list with all recent opened workspaces
+QStringList Application::recentWorkspaceFilenameList() const
+{
+    return recentWorkspaceFilenameList_;
+}
+
+
+/// clears the recent workspace filename list
+void Application::clearRecentWorkspaceFilenameList()
+{
+    recentWorkspaceFilenameList().clear();
+    // notify the list has changed
+    emit recentWorkspaceFilenameListChanged();
 }
 
 

@@ -59,6 +59,7 @@ public slots:
 
     void newWorkspace();
     bool openWorkspace(const QString& fileName );
+    bool openWorkspaceWithActionDataFilename();
     bool openWorkspace();
     bool saveWorkspace();
     bool saveWorkspaceAs();
@@ -87,6 +88,8 @@ protected slots:
     void showFindWidget();
 
     void updateActions();
+    void updateRecentWorkspaceMenuItems();
+
 
 //    void onPaste();
 //    void onCopy();
@@ -130,4 +133,5 @@ private:
     QComboBox* encodingComboRef_;                   ///< The encodign combobox
     QHash<QString,QAction*> actionMap_;             ///< The actionmap with all actions for this window
     Workspace* workspaceRef_;                       ///< The workspace this window belongs to
+    QMenu* recentItemsMenuRef_;                     ///< A reference to the recent menu items list
 };

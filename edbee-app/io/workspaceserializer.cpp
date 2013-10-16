@@ -60,6 +60,7 @@ bool WorkspaceSerializer::saveState(const QString& fileName)
     QVariantMap data;
     data.insert("workspace", serializeWorkspace( edbeeApp()->workspace() ) );
     data.insert("workspace-file", edbeeApp()->workspace()->filename() );
+    data.insert("recent-workspaces", edbeeApp()->recentWorkspaceFilenameList() );
 
     // serialize the data (into a json document)
     QJsonDocument doc;
@@ -91,13 +92,18 @@ bool WorkspaceSerializer::loadState(const QString& fileName)
     QVariantMap map = parser.result().toMap();
     QString workspaceFile = map.value("workspace-file").toString();
     if( !workspaceFile.isEmpty() && QFile::exists( workspaceFile ) ) {
-qlog_info() << "Load workspace filename!!";
         loadWorkspace( workspaceFile );
     // else we restore the workspace stored in the last session
     } else {
-qlog_info() << "Using state-workspace!!";
         deserializeWorkspace( edbeeApp()->workspace(), map.value("workspace").toMap() );
     }
+
+    // deserialize the recent workspace file list
+    QStringList recentList = map.value("recent-workspaces").toStringList();
+    if( !recentList.isEmpty() ) {
+        edbeeApp()->setRecentWorkspaceFilenameList( recentList );
+    }
+
     return true;
 }
 
@@ -149,11 +155,14 @@ Workspace* WorkspaceSerializer::loadWorkspace( const QString& fileName )
 
     // change the application workspace
     Workspace* result = new Workspace();
+    result->setFilename( fileName );            // this need to be set before giving it to the workspace
     edbeeApp()->giveWorkspace( result );
-    result->setFilename( fileName );
 
-    // load the data
+    // load the data into the workspace
+    // Unfortunately the current implementation depends on the window being available.
+    // so the deserialization needs to take place after giving it to the application
     deserializeWorkspace( result, map );
+
     return result;
 }
 

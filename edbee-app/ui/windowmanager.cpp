@@ -44,8 +44,6 @@ void WindowManager::createAndShowWindowIfEmpty()
 }
 
 
-
-
 /// retursn the number of active windows
 int WindowManager::windowCount() const
 {

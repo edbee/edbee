@@ -7,6 +7,7 @@
 
 #include <QApplication>
 #include <QFont>
+#include <QStringList>
 
 class EdbeeConfig;
 class QtAwesome;
@@ -49,8 +50,15 @@ public:
     Workspace* workspace() const;
     void giveWorkspace( Workspace* workspace );
     void closeWorkspace();
+    void addToRecentWorkspaceFilenameList( const QString& filename );
+    void setRecentWorkspaceFilenameList( const QStringList& filenameList );
+    QStringList recentWorkspaceFilenameList() const;
+    void clearRecentWorkspaceFilenameList();
 
-    //bool giveAndSwitchWorkspace( Workspace* workspace );
+signals:
+    /// This signal is fired with the recentWorkspaceFilenameList is changed
+    void recentWorkspaceFilenameListChanged();
+
 
 protected:
     bool event(QEvent* event);
@@ -64,6 +72,8 @@ private:
     EdbeeConfig* config_;           ///< The main edbee configuration file
     WindowManager* windowManager_;  ///< The window manager
     Workspace* workspace_;          ///< The current workspace. At the moment only 1 workspace can be opened. In the future we might support multiple workspace
+
+    QStringList recentWorkspaceFilenameList_;  ///< The recent workspace filename list
 };
 
 

@@ -385,6 +385,21 @@ bool MainWindow::openWorkspace( const QString& fileName )
 }
 
 
+/// This method opens the workspace by retrieving the filename
+/// from the senders() QAction userdata
+/// This method is used for the recent workspace list
+bool MainWindow::openWorkspaceWithActionDataFilename()
+{
+    // we expect an action here
+    QAction* action= qobject_cast<QAction*>(sender());
+    if( action ) {
+        QString filename = action->data().toString();
+        return openWorkspace( filename );
+    }
+    return false;
+}
+
+
 /// open the workspace and shows a dialog
 /// @returns false on error or if no file is selected
 bool MainWindow::openWorkspace()
@@ -445,6 +460,9 @@ bool MainWindow::saveWorkspaceAs()
     // create a new workspace
     workspaceRef_->setFilename( filename );
     if( saveWorkspace() ) {
+
+        // add the new filename to the recent workspace filenamelist
+        edbeeApp()->addToRecentWorkspaceFilenameList( workspaceRef_->filename() );
         return true;
     }
     workspaceRef_->setFilename( oldFilename );
@@ -683,6 +701,32 @@ void MainWindow::showFindWidget()
 void MainWindow::updateActions()
 {
     updateStateEditorActions();
+
+}
+
+
+/// Updates the recent menu item list
+void MainWindow::updateRecentWorkspaceMenuItems()
+{
+    // remove all existing menu items (perhaps, we should delete the actions)
+    recentItemsMenuRef_->clear();
+
+    // add all recent files
+    QStringList recentList = edbeeApp()->recentWorkspaceFilenameList();
+    foreach( QString filename, recentList ) {
+        // create the action
+        QAction* action = new QAction( filename, recentItemsMenuRef_ );
+        action->setData( filename );
+        connect( action, SIGNAL(triggered()), this, SLOT(openWorkspaceWithActionDataFilename()) );
+
+        // add the action the recent menu list
+        recentItemsMenuRef_->addAction( action );
+    }
+
+    /// Add the clear recent workspace list action
+    recentItemsMenuRef_->addSeparator();
+    QAction* clearListAction = new QAction( tr("Clear List"), recentItemsMenuRef_);
+    recentItemsMenuRef_->addAction( clearListAction );
 
 }
 
@@ -943,14 +987,17 @@ void MainWindow::constructMenu()
     gotoMenu->addAction( action("goto.prev_tab"));
     gotoMenu->addAction( action("goto.next_tab"));
 
+    // add the workspace menu items
     QMenu* workspaceMenu = menuBar()->addMenu("Workspace");
     workspaceMenu->addAction( action("workspace.new") );
     workspaceMenu->addSeparator();
     workspaceMenu->addAction( action("workspace.open") );
+    recentItemsMenuRef_ = workspaceMenu->addMenu( tr("Open Recent") );
     workspaceMenu->addSeparator();
     workspaceMenu->addAction( action("workspace.save") );
     workspaceMenu->addAction( action("workspace.save_as") );
 
+    // add the window menu items
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
     windowMenu->addAction( action("win.minimize"));
     windowMenu->addAction( action("win.maximize"));
@@ -959,6 +1006,10 @@ void MainWindow::constructMenu()
     windowMenu->addSeparator();
     windowMenu->addAction( action("win.new"));     // I think it is, so we add those options here too :)
     windowMenu->addAction( action("win.close"));
+
+    // update the workspace menu items menu
+    updateRecentWorkspaceMenuItems();
+
 }
 
 
@@ -974,6 +1025,6 @@ void MainWindow::connectSignals()
 
     // tree menu actions
     connect( fileTreeSideWidgetRef_,SIGNAL(fileDoubleClicked(QString)), SLOT(gotoFile(QString)) );
-
+    connect( edbeeApp(), &Application::recentWorkspaceFilenameListChanged,  this, &MainWindow::updateRecentWorkspaceMenuItems );
 }
 
