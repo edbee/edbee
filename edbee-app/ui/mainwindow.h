@@ -79,7 +79,7 @@ public slots:
     void lineEndingChanged();
     void grammarChanged();
 
-    void editorActionTrigged();
+    void editorActionTriggered();
     void updateStateEditorActions();
 
 protected slots:
@@ -89,7 +89,6 @@ protected slots:
 
     void updateActions();
     void updateRecentWorkspaceMenuItems();
-
 
 //    void onPaste();
 //    void onCopy();

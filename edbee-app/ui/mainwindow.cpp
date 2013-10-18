@@ -622,15 +622,20 @@ void MainWindow::grammarChanged()
 }
 
 
-/// executes if an action is triggered
-void MainWindow::editorActionTrigged()
+/// executed when an editor action is triggered
+void MainWindow::editorActionTriggered()
 {
-     QAction* action = qobject_cast<QAction*>(sender());
-     edbee::TextEditorWidget* widget = tabEditor();
-     if( action && widget ) {
-         edbee::TextEditorCommand* command = widget->commandMap()->get( action->data().toString() );
-         command->execute( widget->controller() );
-     }
+    // retrieve the action and the widget
+    QAction* action = qobject_cast<QAction*>(sender());
+    edbee::TextEditorWidget* widget = tabEditor();
+    if( action && widget ) {
+
+        // execute the command when it's triggered
+        edbee::TextEditorCommand* command = widget->commandMap()->get( action->data().toString() );
+        if( command ) {
+            widget->controller()->executeCommand( );
+        }
+    }
 }
 
 
@@ -801,7 +806,7 @@ void MainWindow::createEditorAction(const QString& id, const char* text )
     edbee::TextEditorKeyMap* map = edbee::Edbee::instance()->defaultKeyMap();
     action->setShortcut( map->get( id )->sequence() );
     action->setData( id );
-    connect( action, SIGNAL(triggered()), SLOT(editorActionTrigged()) );
+    connect( action, SIGNAL(triggered()), SLOT(editorActionTriggered()) );
     actionMap_.insert(id,action);
 }
 
@@ -822,7 +827,7 @@ void MainWindow::createAction(const QString& id, const QString& text, const QKey
 }
 
 
-
+/// Constructs all actions
 void MainWindow::constructActions()
 {
     createAction( "file.new", tr("&New File"), QKeySequence::New, this, SLOT(newFile()) );
