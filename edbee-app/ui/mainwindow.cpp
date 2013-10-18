@@ -633,7 +633,7 @@ void MainWindow::editorActionTriggered()
         // execute the command when it's triggered
         edbee::TextEditorCommand* command = widget->commandMap()->get( action->data().toString() );
         if( command ) {
-            widget->controller()->executeCommand( );
+            widget->controller()->executeCommand( command );
         }
     }
 }
