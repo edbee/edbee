@@ -12,8 +12,10 @@
 #include <QMessageBox>
 #include <QStandardPaths>
 
-#include "edbee/io/tmlanguageparser.h"
+#include "commands/revealinsidebarcommand.h"
 #include "edbee/edbee.h"
+#include "edbee/io/tmlanguageparser.h"
+#include "edbee/models/texteditorcommandmap.h"
 #include "edbee/views/texttheme.h"
 #include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
@@ -69,6 +71,9 @@ void Application::initApplication()
     tm->setThemePath( QString("%1%2").arg(appDataPath_).arg("themes") );
     tm->init();   
     tm->autoShutDownOnAppExit();
+
+    // register the custom command
+    registerCustomEditorCommands();
 
     // make sure the user config path exists
 //    QDir dir( userConfigPath() );
@@ -388,6 +393,15 @@ bool Application::event(QEvent* event)
             break;
     }
     return QApplication::event(event);
+}
+
+
+/// Registers some extra editor commands
+/// By registering commands to the TextEditorCommand map it becomes possible to assign keybinding to them
+void Application::registerCustomEditorCommands()
+{
+    edbee::TextEditorCommandMap* map = edbee::Edbee::instance()->defaultCommandMap();
+    map->give( "app.reveal-in-sidebar", new RevealInSidebarCommand() );
 }
 
 

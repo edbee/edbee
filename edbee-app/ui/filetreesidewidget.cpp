@@ -197,6 +197,14 @@ void FileTreeSideWidget::clearAllRootPaths()
 }
 
 
+/// Reveals the given filename in the tree
+/// In other words this method selects the given file in the filetree (if it exsists)
+void FileTreeSideWidget::reveal(const QString& filename)
+{
+    this->fileTreeRef_->setCurrentIndex( fileTreeModel_->index( filename ) );
+}
+
+
 /// Constructs the user interface
 void FileTreeSideWidget::constructUI()
 {
@@ -247,6 +255,7 @@ void FileTreeSideWidget::constructUI()
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setSpacing(0);
 
+    // add the root paths combobox
     QHBoxLayout* comboLayout = new QHBoxLayout();
     comboLayout->setSpacing(0);
     comboLayout->addWidget(pathComboRef_,1);

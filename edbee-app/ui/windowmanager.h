@@ -20,6 +20,7 @@ public:
 
     MainWindow* createWindow(Workspace* workspace);
     void createAndShowWindowIfEmpty();
+    MainWindow* activeWindow() const;
 
     int windowCount() const;
     MainWindow* window( int idx ) const;

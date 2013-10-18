@@ -737,6 +737,38 @@ void MainWindow::updateRecentWorkspaceMenuItems()
 }
 
 
+/// This method shows a custom editor context menu
+void MainWindow::editorContextMenu()
+{
+    // retrieve the current controller and editor
+    edbee::TextEditorWidget* editor = tabEditor();
+    if( editor ) {
+        edbee::TextEditorController* controller = tabEditor()->controller();
+
+        // create the menu
+        QMenu* menu = new QMenu();
+        menu->addAction( controller->createAction( "cut", tr("Cut") ) );
+        menu->addAction( controller->createAction( "copy", tr("Copy") ) );
+        menu->addAction( controller->createAction( "paste", tr("Paste") ) );
+        menu->addSeparator();
+        menu->addAction( controller->createAction( "sel_all", tr("Select All") ) );
+
+        // is a file coupled to the curent editor add 'reveal in sidebar'
+        if( !tabFilename().isEmpty() ) {
+            menu->addSeparator();
+            menu->addAction( controller->createAction( "app.reveal-in-sidebar", tr("Reveal in sidebar") ) );
+        }
+
+        /// shows the contextmenu
+        menu->exec( QCursor::pos() );
+
+        // cleaup the contextmenu
+        qDeleteAll( menu->actions() );
+        delete menu;
+    }
+}
+
+
 /// When a file or folder is dropped try to open it
 void MainWindow::dropEvent(QDropEvent* event)
 {
@@ -785,11 +817,20 @@ void MainWindow::closeEvent(QCloseEvent* event)
 /// This method simply creates new editor. Applying all settings
 edbee::TextEditorWidget* MainWindow::createEditorWidget()
 {
+    // create the widget and apply the configuration
     edbee::TextEditorWidget* result = new edbee::TextEditorWidget();
     edbeeApp()->config()->applyToWidget( result );
+
+    // connect our custom contextmenu to the widget
+    result->textEditorComponent()->setContextMenuPolicy( Qt::CustomContextMenu  );
+    connect( result->textEditorComponent(), SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(editorContextMenu()) );
     return result;
 }
 
+
+/// Returns the action in the actionmap with the given name
+/// @param name the name of the action to retrieve
+/// @return the action with the given name or 0 if no action was found
 QAction *MainWindow::action(const QString& name)
 {
     return actionMap_.value(name);

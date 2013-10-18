@@ -41,6 +41,8 @@ public slots:
     void clearCurrentRootPath();
     void clearAllRootPaths();
 
+    void reveal( const QString& filename );
+
 private:
 
     void constructUI();

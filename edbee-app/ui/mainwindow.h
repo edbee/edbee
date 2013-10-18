@@ -90,6 +90,9 @@ protected slots:
     void updateActions();
     void updateRecentWorkspaceMenuItems();
 
+
+    void editorContextMenu();
+
 //    void onPaste();
 //    void onCopy();
 //    void onCut();

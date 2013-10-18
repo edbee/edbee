@@ -28,7 +28,7 @@ WindowManager::~WindowManager()
 /// @param workspace the workpsace to create this window for
 MainWindow* WindowManager::createWindow( Workspace* workspace )
 {
-    MainWindow* result = new MainWindow( edbeeApp()->workspace() );
+    MainWindow* result = new MainWindow( workspace );
     windowList_.push_back(result);
     connect( result, &MainWindow::windowClosed, this, &WindowManager::windowClosed );
     return result;
@@ -41,6 +41,14 @@ void WindowManager::createAndShowWindowIfEmpty()
     if( windowList_.isEmpty() ) {
         createWindow( edbeeApp()->workspace() )->show();
     }
+}
+
+
+/// Retuns the current active window
+/// @return the active window or 0 if no window is active
+MainWindow* WindowManager::activeWindow() const
+{
+    return qobject_cast<MainWindow*>(edbeeApp()->activeWindow());
 }
 
 

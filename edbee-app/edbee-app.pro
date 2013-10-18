@@ -25,7 +25,8 @@ SOURCES +=\
     models/edbeeconfig.cpp \
     ui/windowmanager.cpp \
     models/workspace.cpp \
-    io/workspaceserializer.cpp
+    io/workspaceserializer.cpp \
+    commands/revealinsidebarcommand.cpp
 
 HEADERS  += \
     ui/mainwindow.h \
@@ -36,7 +37,8 @@ HEADERS  += \
     models/edbeeconfig.h \
     ui/windowmanager.h \
     models/workspace.h \
-    io/workspaceserializer.h
+    io/workspaceserializer.h \
+    commands/revealinsidebarcommand.h
 
 
 RESOURCES += \

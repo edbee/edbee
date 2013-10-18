@@ -63,6 +63,8 @@ signals:
 protected:
     bool event(QEvent* event);
 
+    void registerCustomEditorCommands();
+
 
 private:
     QString appDataPath_;           ///< The application data path
