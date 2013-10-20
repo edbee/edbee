@@ -86,7 +86,7 @@ int MainWindow::tabCount() const
 
 
 /// Returns the filenane open in the given tab
-/// @param idx the tab index
+/// @param idx the tab index. When -1 is supplied the active tab is selected
 /// @return the filename
 QString MainWindow::tabFilename(int idx) const
 {
@@ -95,6 +95,22 @@ QString MainWindow::tabFilename(int idx) const
         return widget->property("file").toString();
     }
     return QString();
+}
+
+
+/// This method returns the name displayed on the given tab
+/// @param idx the tab index to retrieve the name for
+/// @return the name on the given tab (or QString if no tab is available
+QString MainWindow::tabName(int idx) const
+{
+    // get the active index if no tab is selected
+    if( idx < 0 ) {
+        // return a blank string
+        idx = tabWidgetRef_->currentIndex();
+        if( idx < 0 ) { return QString(); }
+    }
+    // simply returnt the text at the given tab index
+    return tabWidgetRef_->tabText(idx);
 }
 
 
@@ -149,6 +165,24 @@ void MainWindow::setWorkspace(Workspace* workpace)
 Workspace* MainWindow::workspace() const
 {
     return workspaceRef_;
+}
+
+
+/// This method checks if a given tab is modified
+bool MainWindow::isModified() const
+{
+    // check all tabs if the content has been persisted
+    for( int i=0,cnt=tabCount(); i<cnt; ++i ) {
+        edbee::TextEditorWidget* widget = tabEditor(i);
+        edbee::TextDocument* document = widget->textDocument();
+
+        // persisted is a document flag that's turned to true when text is changed
+        if( !document->isPersisted() ) {
+            return true;
+        }
+    }
+    // all tabs have been persisted, so nothing is modified
+    return false;
 }
 
 
@@ -267,26 +301,53 @@ void MainWindow::addEditorTab(edbee::TextEditorWidget* editor, const QString& fi
 
 
 /// Closes the file with the given tab indec
-/// @param idx the index of the tab to close
-void MainWindow::closeFileWithTabIndex(int idx)
+/// @param idx the index of the tab to close (<0 means close the active tab)
+/// @return true if the tab has been closed.
+///       false means the save has been canceled or the save has failed
+bool MainWindow::closeFileWithTabIndex(int idx)
 {
+    // retrieve the current tab index if <0 )
     if( idx < 0 ) {
         idx = tabWidgetRef_->currentIndex();
     }
+
+    // is there an tab index ??
     if( idx >= 0 ) {
         edbee::TextEditorWidget* widget = tabEditor( idx );
         if( widget && !widget->textDocument()->isPersisted() ) {
-            QMessageBox::StandardButton but = QMessageBox::question(this, tr("Save changes?"), tr("File has been changed, do you want to save the changes?"), QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel );
+
+            // retrieve the filename
+            QString file = widget->property("file").toString();     // FIXME: We really need to improve the tab-widget
+            QString tabname = tabName(idx);
+
+            // show a different message if the file hasn't been saved
+            QString msg;
+            if( file.isEmpty() ) {
+                msg  = tr("Tab '%1' hasn't been saved!\nDo you want to save the file?").arg( tabname );
+            } else {
+                msg = tr("File '%1' has been changed!\nDo you want to save the changes?").arg( file );
+            }
+
+            // show the standard message
+            QMessageBox::StandardButton but = QMessageBox::question(this, tr("Save changes?"), msg, QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel );
+
+            // save options has been chosen
             if( but == QMessageBox::Save ) {
-                if( !saveFile() ) { return; }
+                if( !saveFile() ) { return false; }
+
+            // when the user doen't choose to disacard the file exit
             } else if( but != QMessageBox::Discard  ) {
-                return;
+                return false;
             }
         }
 
+        // remove the tab
         tabWidgetRef_->removeTab(idx);
         updatePersistedState(); // maybe the persisted state has changed
+        return true;
     }
+    // this only happens when there's no active tab
+    return false;
 }
 
 
@@ -800,15 +861,20 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* event)
 }
 
 
-/// When the window is closed the close event need to handled
+/// When the window is closed check if a tab has been changed
+/// ask for saving the changes
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-//    if (maybeSave()) {
-//        writeSettings();
-//        event->accept();
-//    } else {
-//        event->ignore();
-//    }
+    // check if all files a clean
+    for( int i=tabCount()-1; i>= 0; --i ) {
+        // close the tab. When the tab isn't closed return and ignore the close evenet
+        if( !closeFileWithTabIndex(i) ) {
+            event->ignore();
+            return;
+        }
+    }
+
+    // emit a close event (this is required for the window-manager to know the window is closed)
     emit windowClosed();
     QMainWindow::closeEvent(event);
 }

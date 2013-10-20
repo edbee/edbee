@@ -36,6 +36,7 @@ public:
 
     int tabCount() const;
     QString tabFilename( int idx = -1 ) const;
+    QString tabName( int idx = -1) const;
     edbee::TextEditorWidget* tabEditor(int index=-1 ) const;
     int activeTabIndex() const;
     void setActiveTabIndex(int idx);
@@ -45,6 +46,8 @@ public:
     void setWorkspace(Workspace* workpace );
     Workspace* workspace() const;
 
+    bool isModified() const;
+
 public slots:
     void openDirOrFile( const QString& path );
     void openDir( const QString& path );
@@ -53,7 +56,7 @@ public slots:
     void openFile();
     void newFile();
     void addEditorTab( edbee::TextEditorWidget* editor, const QString& fileName );
-    void closeFileWithTabIndex( int idx=-1 );
+    bool closeFileWithTabIndex( int idx=-1 );
     bool saveFile();
     bool saveFileAs();
 
