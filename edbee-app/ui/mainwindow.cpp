@@ -595,6 +595,11 @@ void MainWindow::activeTabChanged()
         // select the correct line ending
         const edbee::LineEnding* lineEnding = doc->lineEnding();
         lineEndingComboRef_->setCurrentIndex( lineEnding->type() );
+
+        // set the filename in the window menu
+        QString filename = widget->property("file").toString();
+        setWindowFilePath(filename);
+        setWindowTitle( filename.isEmpty() ? qApp->applicationDisplayName() : tr("%1 - %2").arg(filename).arg(qApp->applicationDisplayName()) );
     }
 
     updateStateEditorActions();

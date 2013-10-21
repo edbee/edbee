@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
     app.setApplicationVersion( "0.1");
     app.setOrganizationName( "edbee" );
     app.setOrganizationDomain( "edbee.net" );
-    app.setApplicationDisplayName("edbee - a sample application for the edbee component");
+    app.setApplicationDisplayName("edbee.app");
 
     // init the logging mechanism
     QsLogging::Logger& logger = QsLogging::Logger::instance();
