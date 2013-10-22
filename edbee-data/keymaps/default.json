@@ -56,6 +56,7 @@
         { "keys": "Backspace", "command": "del_left" },
 		{ "keys": "Shift+Backspace", "command": "del_left" },
 		{ "keys": "Delete", "command": "del_right" },
+        { "keys": "Shift+Delete", "command": "del_right" },
 
 		// tab entry
 		{ "keys": "Tab", "command": "tab" },
