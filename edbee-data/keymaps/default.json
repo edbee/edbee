@@ -65,7 +65,11 @@
 		{ "keys": "Shift+Backtab", "command": "tab_back" },
 		{ "keys": "Ctrl+]", "command": "indent" },
 		{ "keys": "Ctrl+[", "command": "outdent" },
-		
+
+
+        // special entry
+        { "keys": "Ctrl+Shift+D", "command": "duplicate" },
+
 		/// TODO: add a backtab action here
 		//set( QKeySequence( Qt::Key_BackTab ), new )
 
