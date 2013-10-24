@@ -1031,21 +1031,11 @@ QComboBox* MainWindow::constructGrammarCombo()
     grammarComboRef_->setMinimumWidth(100);
     edbee::TextGrammarManager* gr = edbee::Edbee::instance()->grammarManager();
 
-    // retrieve all grammar names and sort them
-    QStringList grammarNames = gr->grammarNames();
-    grammarNames.sort( Qt::CaseInsensitive );
-
-    // next add all grammars in the given list
-    grammarNames.removeOne(""); // remove the plaint-text grammar
-    grammarNames.push_front(""); // place, plaint text as the first language
-
+    QList<edbee::TextGrammar*> grammarList = gr->grammarsSortedByDisplayName();
 
     // next add all grammars
-    foreach( QString name, grammarNames ) {
-        edbee::TextGrammar* grammar = gr->get(name);
-        if( grammar ) {
-            grammarComboRef_->addItem(grammar->displayName(), grammar->name());
-        }
+    foreach( edbee::TextGrammar* grammar, grammarList ) {
+        grammarComboRef_->addItem(grammar->displayName(), grammar->name());
     }
     return grammarComboRef_;
 }
