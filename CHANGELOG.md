@@ -13,7 +13,6 @@ edbee.app:
 - add #17, added a test-project to make the edbee app testable
 - add #13, json configuration support
 - add #44, clear history to file-root combobox in sidebar
-
 - fix #54, Sort the grammar combobx alphabetically
 - fix #26, Support multiple windows, with the help of a window manager
 - fix #15, It now is possible to change to the font of the editor
@@ -27,7 +26,6 @@ edbee.lib:
 - add #43, Added right-click context-menu support to edbee. With default operations, cut, copy, paste and select all.
 - add #36, Pressing shift-enter now inserts a newline
 - add #31, Textsearching now also works with other ranges then textselection ranges
-
 - fix #72, TextDocument replaceRanges should calculate the ranges in stead of the TextChange event.
 - fix #69, Plain Text was included twice by the grammar manager
 - fix #57, Tab behaviour didn't work as expected when using space in stead of tab characters
