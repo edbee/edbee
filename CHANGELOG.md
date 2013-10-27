@@ -26,6 +26,7 @@ edbee.lib:
 - add #43, Added right-click context-menu support to edbee. With default operations, cut, copy, paste and select all.
 - add #36, Pressing shift-enter now inserts a newline
 - add #31, Textsearching now also works with other ranges then textselection ranges
+- fix #76, Pressing enter doesn't scroll the horizontal window back to the first column
 - fix #75, Goto pathname in treemenu doesn't display extension
 - fix #72, TextDocument replaceRanges should calculate the ranges in stead of the TextChange event.
 - fix #69, Plain Text was included twice by the grammar manager
