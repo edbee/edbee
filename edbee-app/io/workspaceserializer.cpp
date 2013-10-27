@@ -303,7 +303,7 @@ QVariantMap WorkspaceSerializer::serializeEditorTab(edbee::TextEditorWidget* edi
 
     // serialize the encoding
     edbee::TextDocument* doc = editor->textDocument();
-    result.insert("encoding", doc->encoding()->name() );
+    result.insert("encoding", doc->encoding()->name() );    // (Save the last encoding)
 
     // add the active grammer
     edbee::TextLexer* lexer = doc->textLexer();
@@ -339,11 +339,11 @@ void WorkspaceSerializer::deserializeEditorTab(edbee::TextEditorWidget* editor, 
     edbee::TextDocument* doc = editor->textDocument();
     edbee::Edbee* edbee = edbee::Edbee::instance();
 
-    // select the correct textencoding
-    edbee::TextCodec* codec = edbee->codecManager()->codecForName( map.value("encoding").toString() );
-    if( codec ) {
-        doc->setEncoding( codec );
-    }
+    // select the correct textencoding (we do not restore the encoding)
+//    edbee::TextCodec* codec = edbee->codecManager()->codecForName( map.value("encoding").toString() );
+//    if( codec ) {
+//        doc->setEncoding( codec );
+//    }
 
     // select the grammar
     edbee::TextLexer* lexer = doc->textLexer();
