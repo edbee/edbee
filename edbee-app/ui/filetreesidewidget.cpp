@@ -133,7 +133,7 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
         QFileInfo fileInfo = fileTreeModel_->fileInfo(index);
 
         if( fileInfo.isDir() ) {
-            QAction* changeRootAction = new QAction(tr("Goto '%1'").arg(fileInfo.baseName()), &menu );
+            QAction* changeRootAction = new QAction(tr("Goto '%1'").arg(fileInfo.fileName()), &menu );
             changeRootAction->setData( fileInfo.absoluteFilePath() );
             connect(changeRootAction, SIGNAL(triggered()), this, SLOT(setRootPathByAction()) );
             menu.addAction(changeRootAction );
