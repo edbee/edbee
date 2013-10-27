@@ -291,6 +291,10 @@ void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantM
 
     // update the side tree
     win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
+
+    // update the tab state
+    win->activeTabChanged();    // makes the tab update the state
+
 }
 
 
@@ -355,6 +359,7 @@ void WorkspaceSerializer::deserializeEditorTab(edbee::TextEditorWidget* editor, 
         if( grammar ) {
             grammarLexer->setGrammar( grammar );
         }
+
     }
 
     // restore the scroll position
