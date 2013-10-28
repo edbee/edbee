@@ -21,11 +21,13 @@ edbee.app:
 
 edbee.lib:
 
+- add #79, Double clicking a selection with the control key again should remove the given selection and caret
 - add #74, Added coalescing support for indenting / inserting tabs
 - add #58, Pressing shift-delete now deletes the selected text
 - add #43, Added right-click context-menu support to edbee. With default operations, cut, copy, paste and select all.
 - add #36, Pressing shift-enter now inserts a newline
 - add #31, Textsearching now also works with other ranges then textselection ranges
+- fix #68, Adding a selection with Cmd+Mouse Double click shouldn't expand existing word selections
 - fix #77, Pressing end of line on the last line, sometimes goes to the wrong location
 - fix #76, Pressing enter doesn't scroll the horizontal window back to the first column
 - fix #75, Goto pathname in treemenu doesn't display extension
