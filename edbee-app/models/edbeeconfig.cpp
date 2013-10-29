@@ -14,6 +14,7 @@
 #include "debug.h"
 
 
+/// The edbee configuration constructor
 EdbeeConfig::EdbeeConfig()
 {
 }
@@ -24,6 +25,7 @@ EdbeeConfig::~EdbeeConfig()
 {
     qDeleteAll( configFileItemList_ );
 }
+
 
 /// Adds a config file to the edbee configuration
 /// The configuration aren't loaded directly
@@ -44,6 +46,7 @@ void EdbeeConfig::addFile(const QString& fileName, ConfigFileMode configFileMode
     }
 }
 
+
 /// Loads the configuration fom the files and places them in the configmap
 /// This method returns true on success, false on error
 bool EdbeeConfig::loadConfig()
@@ -55,6 +58,7 @@ bool EdbeeConfig::loadConfig()
     foreach( EdbeeConfigFileItem* cfi, configFileItemList_ ) {
         cfi->setLoadMessage(QString()); // clear the load messsage
 
+        // create the parser and if the file exist parse the content
         edbee::JsonParser parser;
         if( QFile::exists( cfi->file() ) ) {
             if( parser.parse( cfi->file() ) ) {
@@ -74,6 +78,7 @@ bool EdbeeConfig::loadConfig()
     return result;
 }
 
+
 /// This method fills the editor-config with the configuration of this objec
 void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
 {
@@ -81,9 +86,10 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->beginChanges();
     config->setCaretBlinkRate( map->intValue("caret_blink_rate",700) );
     config->setCaretWidth( map->intValue("caret_width",2) );
-    config->setCharGroups( QStringList(map->stringValue("char_groups")) );          /// this should use character groups
+    config->setCharGroups( QStringList(map->stringValue("char_groups")) );          // this should use character groups
     config->setExtraLineSpacing( map->intValue("extra_line_spacing", 0 ));
     config->setIndentSize( map->intValue("indent_size",4) );
+    config->setSmartTab( map->boolValue("smart_tab",true) );                        // returns the smarttab value
     //config->setLineSeperatorPen( );
     config->setShowCaretOffset( map->boolValue("show_caret_offset",true));
     config->setThemeName( map->stringValue("theme", "Monokai") );
@@ -94,6 +100,7 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->setFont(font);
     config->endChanges();
 }
+
 
 /// Applies the current config to the given widget
 void EdbeeConfig::applyToWidget(edbee::TextEditorWidget* widget) const
@@ -109,20 +116,26 @@ edbee::CascadingQVariantMap* EdbeeConfig::configMap() const
     return configFileItemList_.last()->configMap();
 }
 
+
 /// Retursn the number of files in this configuration
 int EdbeeConfig::fileCount() const
 {
     return configFileItemList_.size();
 }
 
+
 /// Returns the filename at the given index
+/// @param idx the index of the file to retrieve
 QString EdbeeConfig::file(int idx) const
 {
     return configFileItemList_.at(idx)->file();
 }
 
+
 /// Returns the load message for the given file
 /// The load message will be null-string if the load was successfull
+/// @param idx the index of the message to retrieve
+/// @return the message for the loading of the given file QString() if successful
 QString EdbeeConfig::loadMessageForFile(int idx) const
 {
     Q_ASSERT(idx < configFileItemList_.size() );
@@ -132,9 +145,11 @@ QString EdbeeConfig::loadMessageForFile(int idx) const
 
 //----------------------------------------------
 
+
 /// Constructs an config item
 /// @param file the configuration filename
-/// @parma mode the mode how to handle this file
+/// @param mode the mode how to handle this file
+/// @param parentConfigFile the parennt config file
 EdbeeConfigFileItem::EdbeeConfigFileItem(const QString& file, EdbeeConfig::ConfigFileMode mode, edbee::CascadingQVariantMap* parentConfigMap )
     : mode_(mode)
     , file_(file)
@@ -143,10 +158,13 @@ EdbeeConfigFileItem::EdbeeConfigFileItem(const QString& file, EdbeeConfig::Confi
     configMap_ = new edbee::CascadingQVariantMap( parentConfigMap );
 }
 
+
+/// The config file destrucotor
 EdbeeConfigFileItem::~EdbeeConfigFileItem()
 {
     delete configMap_;
 }
+
 
 /// returns the file mode of this item
 EdbeeConfig::ConfigFileMode EdbeeConfigFileItem::mode() const
@@ -154,23 +172,28 @@ EdbeeConfig::ConfigFileMode EdbeeConfigFileItem::mode() const
     return mode_;
 }
 
+
 /// Retursn the filename
 QString EdbeeConfigFileItem::file() const
 {
     return file_;
 }
 
+
 /// Sets the loading result message
+/// @param str the message of this file
 void EdbeeConfigFileItem::setLoadMessage(const QString& str)
 {
     loadMessage_ = str;
 }
+
 
 /// Returns the error/load message. When the result is QString() there's no message
 QString EdbeeConfigFileItem::loadMessage() const
 {
     return loadMessage_;
 }
+
 
 /// Returns the configmap
 edbee::CascadingQVariantMap *EdbeeConfigFileItem::configMap()

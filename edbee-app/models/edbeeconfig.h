@@ -64,7 +64,6 @@ public:
 
     edbee::CascadingQVariantMap* configMap();
 
-
 private:
 
     EdbeeConfig::ConfigFileMode mode_;       ///< The configuration file mode

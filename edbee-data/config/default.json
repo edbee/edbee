@@ -6,7 +6,7 @@
     , "font": "Monospace"
     , "font_size": 12
     , "indent_size": 4
-
+    , "smart_tab": true
 //    , "line_seperator_pen": " #aaaaaa; 1.5; dashed" // we need to figure out a good format for this
 
     , "show_caret_offset": true

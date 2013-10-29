@@ -21,6 +21,7 @@ edbee.app:
 
 edbee.lib:
 
+- add #78, Added language independent smart tab support (enabled by default)
 - add #79, Double clicking a selection with the control key again should remove the given selection and caret
 - add #74, Added coalescing support for indenting / inserting tabs
 - add #58, Pressing shift-delete now deletes the selected text
