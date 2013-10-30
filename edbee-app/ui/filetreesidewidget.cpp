@@ -128,22 +128,40 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
     // build the context menu
     QMenu menu;
 
-    // valid item clicked
+    // get the file info
+    QFileInfo fileInfo;
     if( index.isValid() ) {
-        QFileInfo fileInfo = fileTreeModel_->fileInfo(index);
-
-        if( fileInfo.isDir() ) {
-            QAction* changeRootAction = new QAction(tr("Goto '%1'").arg(fileInfo.fileName()), &menu );
-            changeRootAction->setData( fileInfo.absoluteFilePath() );
-            connect(changeRootAction, SIGNAL(triggered()), this, SLOT(setRootPathByAction()) );
-            menu.addAction(changeRootAction );
-        }
-        if( !menu.isEmpty() ) {
-            menu.addSeparator();
-        }
+        fileInfo = fileTreeModel_->fileInfo(index);
     }
 
-    menu.addAction( tr("Goto '/'"), this, SLOT(setRootPath()) );
+
+    // GOTO Menu building
+    QMenu* gotoMenu = menu.addMenu("Goto");
+    if( index.isValid() ) {
+
+        // add the clicked file to the goto menu when the file is a dir
+        if( fileInfo.isDir() ) {
+            QAction* changeRootAction = new QAction(tr("%1").arg(fileInfo.fileName()), &menu );
+            changeRootAction->setData( fileInfo.absoluteFilePath() );
+            connect(changeRootAction, SIGNAL(triggered()), this, SLOT(setRootPathByAction()) );
+            gotoMenu->addAction(changeRootAction);
+        }
+
+        // add a rename action
+        QAction* renameAction = new QAction(tr("Rename"),&menu);
+        renameAction->setData( fileInfo.absoluteFilePath() );
+        connect( renameAction, SIGNAL(triggered()), this, SLOT(startRenameItemByAction()) );
+        menu.addAction( renameAction );
+    }
+
+
+    // when the goto menu isn't empty add a seperator
+    if( !gotoMenu->isEmpty() ) {
+        gotoMenu->addSeparator();
+    }
+    gotoMenu->addAction( tr("/"), this, SLOT(setRootPath()) );
+
+
     menu.exec(globalPos);
 }
 
@@ -205,6 +223,26 @@ void FileTreeSideWidget::reveal(const QString& filename)
 }
 
 
+/// renames the given file-item
+void FileTreeSideWidget::startRenameItem(const QString& filename)
+{
+    QModelIndex idx = fileTreeModel_->index( filename );
+    if( idx.isValid() ) {
+        fileTreeRef_->edit( idx );
+    }
+}
+
+
+/// Starts the rename of a file with the help of a qaction object
+void FileTreeSideWidget::startRenameItemByAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        startRenameItem( action->data().toString() );
+    }
+}
+
+
 /// Constructs the user interface
 void FileTreeSideWidget::constructUI()
 {
@@ -216,6 +254,7 @@ void FileTreeSideWidget::constructUI()
 //    fileTreeModel_->setReadOnly(true);
     fileTreeModel_->setRootPath("/");
     fileTreeModel_->setFilter(QDir::Hidden|QDir::AllEntries|QDir::NoDotAndDotDot);
+    fileTreeModel_->setReadOnly(false);     // make it editable
 //    fileTreeModel_->setSorting( QDir::DirsFirst | QDir::IgnoreCase | QDir::Name );
 
     fileTreeRef_ = new QTreeView();

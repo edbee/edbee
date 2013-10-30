@@ -2,6 +2,7 @@
 
 edbee.app:
 
+- add #80, Add rename file support to the tree view
 - add #57, Show active file and icon in the titlebar 
 - add #27, Added file-changed check support when closing the window/application
 - add #42, Reveal in sidebar support added to context menu

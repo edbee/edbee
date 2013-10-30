@@ -42,6 +42,8 @@ public slots:
     void clearAllRootPaths();
 
     void reveal( const QString& filename );
+    void startRenameItem( const QString& filename );
+    void startRenameItemByAction();
 
 private:
 
