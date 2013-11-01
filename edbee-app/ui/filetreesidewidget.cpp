@@ -154,12 +154,19 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
         connect( renameAction, SIGNAL(triggered()), this, SLOT(startRenameItemByAction()) );
         menu.addAction( renameAction );
 
-        // when clicking on a directory add a create new file option
+        // when clicking on a directory add a create new file/folder options
         if( fileInfo.isDir() ) {
+            // create new file aciton
             QAction* newFileAction = new QAction( tr("New File"), &menu);
             newFileAction ->setData( fileInfo.absoluteFilePath() );
             connect( newFileAction , SIGNAL(triggered()), this, SLOT(createNewFileAndRenameByAction()) );
             menu.addAction( newFileAction );
+
+            // create new folder action
+            QAction* newFolderAction = new QAction( tr("New Folder"), &menu);
+            newFolderAction ->setData( fileInfo.absoluteFilePath() );
+            connect( newFolderAction , SIGNAL(triggered()), this, SLOT(createNewFolderAndRenameByAction()) );
+            menu.addAction( newFolderAction );
         }
 
     }
@@ -279,10 +286,36 @@ void FileTreeSideWidget::createNewFileAndRename(const QString& pathname)
 /// Creates a new file an renames it with the given action
 void FileTreeSideWidget::createNewFileAndRenameByAction()
 {
-
     QAction* action = qobject_cast<QAction*>(sender());
     if( action ) {
         createNewFileAndRename( action->data().toString() );
+    }
+}
+
+
+/// Creates a new folder and directly start renaming it
+void FileTreeSideWidget::createNewFolderAndRename(const QString& pathname)
+{
+    if( !pathname.isEmpty() ) {
+        // generate a new filename
+        QString filename = FileUtil().generateNewFilename( pathname, "New Folder %1" );
+        if( !filename.isEmpty() ) {
+
+            // next go and create a folder
+            if( QDir::root().mkdir(filename) ) {
+                startRenameItem( filename );
+            }
+        }
+    }
+}
+
+
+/// Creates a new folder and
+void FileTreeSideWidget::createNewFolderAndRenameByAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        createNewFolderAndRename( action->data().toString() );
     }
 }
 
