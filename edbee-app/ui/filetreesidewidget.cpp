@@ -19,6 +19,7 @@
 #include "filetreesidewidget.h"
 #include "models/workspace.h"
 #include "QtAwesome.h"
+#include "util/fileutil.h"
 
 #include "debug.h"
 
@@ -152,6 +153,15 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
         renameAction->setData( fileInfo.absoluteFilePath() );
         connect( renameAction, SIGNAL(triggered()), this, SLOT(startRenameItemByAction()) );
         menu.addAction( renameAction );
+
+        // when clicking on a directory add a create new file option
+        if( fileInfo.isDir() ) {
+            QAction* newFileAction = new QAction( tr("New File"), &menu);
+            newFileAction ->setData( fileInfo.absoluteFilePath() );
+            connect( newFileAction , SIGNAL(triggered()), this, SLOT(createNewFileAndRenameByAction()) );
+            menu.addAction( newFileAction );
+        }
+
     }
 
 
@@ -239,6 +249,40 @@ void FileTreeSideWidget::startRenameItemByAction()
     QAction* action = qobject_cast<QAction*>(sender());
     if( action ) {
         startRenameItem( action->data().toString() );
+    }
+}
+
+
+/// Creates a new file and starts to edit this file
+/// @param pathname the name of the path to create the file in
+void FileTreeSideWidget::createNewFileAndRename(const QString& pathname)
+{
+    if( !pathname.isEmpty() ) {
+        // generate a new filename
+        QString filename = FileUtil().generateNewFilename( pathname, "Untitled %1.txt" );
+        if( !filename.isEmpty() ) {
+
+            // next go and create a 0 byte file
+            QFile file(filename);
+            if( file.open( QFile::WriteOnly) ) {
+                file.flush();
+                file.close();
+
+                // edit this name of this file
+                startRenameItem( filename );
+            }
+        }
+    }
+}
+
+
+/// Creates a new file an renames it with the given action
+void FileTreeSideWidget::createNewFileAndRenameByAction()
+{
+
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        createNewFileAndRename( action->data().toString() );
     }
 }
 
