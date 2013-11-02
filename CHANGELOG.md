@@ -2,6 +2,7 @@
 
 edbee.app:
 
+- add #82, Add remove item option to sidebar file tree
 - add #81, Add new folder option to sidebar file tree
 - add #62, Add create new file option to the tree view sidebar
 - add #80, Add rename file support to the tree view

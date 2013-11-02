@@ -9,6 +9,7 @@
 #include <QFileSystemModel>
 #include <QLabel>
 #include <QMenu>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QStringListModel>
 #include <QTreeView>
@@ -149,10 +150,16 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
         }
 
         // add a rename action
-        QAction* renameAction = new QAction(tr("Rename"),&menu);
+        QAction* renameAction = new QAction(tr("Rename.."),&menu);
         renameAction->setData( fileInfo.absoluteFilePath() );
         connect( renameAction, SIGNAL(triggered()), this, SLOT(startRenameItemByAction()) );
         menu.addAction( renameAction );
+
+        // add a delete action
+        QAction* deleteAction = new QAction(tr("Delete..."),&menu);
+        deleteAction->setData( fileInfo.absoluteFilePath() );
+        connect( deleteAction, SIGNAL(triggered()), this, SLOT(deleteItemByAction()) );
+        menu.addAction( deleteAction );
 
         // when clicking on a directory add a create new file/folder options
         if( fileInfo.isDir() ) {
@@ -316,6 +323,45 @@ void FileTreeSideWidget::createNewFolderAndRenameByAction()
     QAction* action = qobject_cast<QAction*>(sender());
     if( action ) {
         createNewFolderAndRename( action->data().toString() );
+    }
+}
+
+
+/// Deletes the given file with the given pathname
+/// @param pathname the item to delete
+void FileTreeSideWidget::deleteItem(const QString& pathname)
+{
+    // when a pathname if given
+    if( !pathname.isEmpty() ) {
+        QFileInfo info( pathname );
+
+        // ask for deletion
+        if( QMessageBox::warning(this,
+            tr("Delete %1?").arg(info.fileName()),
+            tr("Delete %1 '%2'? Are you sure?").arg(info.isDir() ? "directory" : "file" ).arg(info.absoluteFilePath()),
+            QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel,QMessageBox::Yes ) != QMessageBox::Yes ) {
+            return;
+        }
+
+        // when it's a directory remove the dir if empty
+        if( info.isDir() ) {
+            QDir dir( info.absoluteFilePath() );
+            dir.removeRecursively();
+
+        // else delete the file
+        } else {
+            QFile::remove( pathname );
+        }
+    }
+}
+
+
+/// Deletes the given pathname with
+void FileTreeSideWidget::deleteItemByAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        deleteItem( action->data().toString() );
     }
 }
 
