@@ -101,7 +101,7 @@ void FileTreeSideWidget::deserialize(const QVariantMap& map)
 
 
 /// The file tree is double clicked
-void FileTreeSideWidget::fileTreeDoubleClicked( const QModelIndex& index)
+void FileTreeSideWidget::openFileItem( const QModelIndex& index)
 {
     // when clicking a file
     QFileInfo fileInfo = fileTreeModel_->fileInfo(index);
@@ -434,7 +434,8 @@ void FileTreeSideWidget::constructUI()
 /// Connects all signals
 void FileTreeSideWidget::connectSignals()
 {
-    connect( fileTreeRef_, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(fileTreeDoubleClicked(QModelIndex)) );
+    connect( fileTreeRef_, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openFileItem(QModelIndex)) );
+    connect( fileTreeRef_, SIGNAL(activated(QModelIndex)), this, SLOT(openFileItem(QModelIndex)) );
     connect( fileTreeRef_, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(fileTreeContextMenu(QPoint)) );
     connect( pathComboRef_, SIGNAL(currentIndexChanged(QString)), this, SLOT(setRootPath(QString)));
 }

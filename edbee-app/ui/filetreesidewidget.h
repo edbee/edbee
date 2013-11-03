@@ -33,7 +33,7 @@ signals:
     
 public slots:
 
-    void fileTreeDoubleClicked( const QModelIndex& index );
+    void openFileItem( const QModelIndex& index );
     void fileTreeContextMenu( const QPoint& point );
     void setRootPath( const QString& rootPath="/" );
     void setRootPathByAction();

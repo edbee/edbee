@@ -3,6 +3,7 @@
 edbee.app:
 
 
+- add #83, Pressing Enter in the filemenu should open the file in the editor
 - add #64, Closing an active tab, puts the keyboard focus on the sidebar. Focus should stay in the editor
 - add #82, Add remove item option to sidebar file tree
 - add #81, Add new folder option to sidebar file tree
