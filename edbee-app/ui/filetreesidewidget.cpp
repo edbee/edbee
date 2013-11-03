@@ -383,6 +383,7 @@ void FileTreeSideWidget::constructUI()
     fileTreeRef_ = new QTreeView();
     fileTreeRef_->setContextMenuPolicy(Qt::CustomContextMenu);
     fileTreeRef_->setModel( fileTreeModel_ );
+    fileTreeRef_->setFocusPolicy( Qt::ClickFocus );
 
 //    QHeaderView* hdr = fileTreeRef_->header();
 //    hdr->setStretchLastSection(true);
