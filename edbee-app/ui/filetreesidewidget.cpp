@@ -252,6 +252,7 @@ void FileTreeSideWidget::startRenameItem(const QString& filename)
 {
     QModelIndex idx = fileTreeModel_->index( filename );
     if( idx.isValid() ) {
+        fileTreeRef_->scrollTo( idx );
         fileTreeRef_->edit( idx );
     }
 }
