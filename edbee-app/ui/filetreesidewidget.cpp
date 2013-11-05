@@ -379,16 +379,16 @@ void FileTreeSideWidget::constructUI()
 
     // create the tree model
     fileTreeModel_ = new QFileSystemModel();
-//    fileTreeModel_->setReadOnly(true);
+    fileTreeModel_->setReadOnly(false);
     fileTreeModel_->setRootPath("/");
     fileTreeModel_->setFilter(QDir::Hidden|QDir::AllEntries|QDir::NoDotAndDotDot);
-    fileTreeModel_->setReadOnly(false);     // make it editable
 //    fileTreeModel_->setSorting( QDir::DirsFirst | QDir::IgnoreCase | QDir::Name );
 
     fileTreeRef_ = new QTreeView();
     fileTreeRef_->setContextMenuPolicy(Qt::CustomContextMenu);
     fileTreeRef_->setModel( fileTreeModel_ );
     fileTreeRef_->setFocusPolicy( Qt::ClickFocus );
+    fileTreeRef_->setEditTriggers( QAbstractItemView::EditKeyPressed );
 
 //    QHeaderView* hdr = fileTreeRef_->header();
 //    hdr->setStretchLastSection(true);
