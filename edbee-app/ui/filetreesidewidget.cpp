@@ -243,7 +243,11 @@ void FileTreeSideWidget::clearAllRootPaths()
 /// In other words this method selects the given file in the filetree (if it exsists)
 void FileTreeSideWidget::reveal(const QString& filename)
 {
-    this->fileTreeRef_->setCurrentIndex( fileTreeModel_->index( filename ) );
+    QModelIndex idx = fileTreeModel_->index( filename );
+    if( idx.isValid() ) {
+        fileTreeRef_->setCurrentIndex( idx );
+        fileTreeRef_->scrollTo(idx);
+    }
 }
 
 
@@ -370,7 +374,7 @@ void FileTreeSideWidget::deleteItemByAction()
 /// Constructs the user interface
 void FileTreeSideWidget::constructUI()
 {
-    QFont newFont = QFont(font().family(), 10 );
+    QFont newFont = QFont(font().family(), 11 );
     setFont(newFont);
 
     // create the tree model
