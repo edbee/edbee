@@ -28,6 +28,7 @@ edbee.app:
 
 edbee.lib:
 
+- add #85, Added scroll-past-end feature
 - add #78, Added language independent smart tab support (enabled by default)
 - add #79, Double clicking a selection with the control key again should remove the given selection and caret
 - add #74, Added coalescing support for indenting / inserting tabs

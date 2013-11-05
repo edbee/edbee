@@ -16,4 +16,5 @@
     , "use_tab": true
     , "whitespaces": "\n\t "
     , "witespace_without_newline": "\t "
+    , "scroll_past_end": false
 }

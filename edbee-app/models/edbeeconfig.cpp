@@ -97,6 +97,7 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->setUseLineSeparator( map->boolValue( "use_line_separator", false) );
     config->setUseTabChar( map->boolValue( "use_tab", true ));
     QFont font( map->stringValue("font","Monospace"), map->intValue("font_size",12) );
+    config->setScrollPastEnd( map->boolValue("scroll_past_end",false) );
     config->setFont(font);
     config->endChanges();
 }
