@@ -2,7 +2,6 @@
 
 edbee.app:
 
-
 - add #83, Pressing Enter in the filemenu should open the file in the editor
 - add #64, Closing an active tab, puts the keyboard focus on the sidebar. Focus should stay in the editor
 - add #82, Add remove item option to sidebar file tree
@@ -36,6 +35,7 @@ edbee.lib:
 - add #43, Added right-click context-menu support to edbee. With default operations, cut, copy, paste and select all.
 - add #36, Pressing shift-enter now inserts a newline
 - add #31, Textsearching now also works with other ranges then textselection ranges
+- fix #86, Pressing left or right when a selection is active shouldn't move the caret (current behavior is not-standard)
 - fix #68, Adding a selection with Cmd+Mouse Double click shouldn't expand existing word selections
 - fix #77, Pressing end of line on the last line, sometimes goes to the wrong location
 - fix #76, Pressing enter doesn't scroll the horizontal window back to the first column
