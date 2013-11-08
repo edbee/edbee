@@ -144,6 +144,14 @@ QString EdbeeConfig::loadMessageForFile(int idx) const
 }
 
 
+/// Returns the autoreveal value
+/// When auto-revealing is enabled the sidebar automaticly reveals the current tab
+bool EdbeeConfig::autoReveal() const
+{
+    return configMap()->boolValue("auto_reveal",false);
+}
+
+
 //----------------------------------------------
 
 

@@ -1,5 +1,6 @@
 {
-    "caret_blink_rate": 700
+    "auto_reveal": false                 // When autoreveal is enabled it syncs the sidebar with the selected file
+    , "caret_blink_rate": 700
     , "caret_width": 2
     , "char_groups": "./\\()\"'-:,.;<>~!@#$%^&*|+=[]{}`~?"
     , "extra_line_spacing": 0

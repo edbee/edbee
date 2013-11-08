@@ -41,7 +41,7 @@ public slots:
     void clearCurrentRootPath();
     void clearAllRootPaths();
 
-    void reveal( const QString& filename );
+    bool reveal( const QString& filename );
 
     void startRenameItem( const QString& filename );
     void startRenameItemByAction();
@@ -54,6 +54,11 @@ public slots:
 
     void deleteItem( const QString& pathname );
     void deleteItemByAction();
+
+
+protected slots:
+
+    void directoryLoaded( const QString& directory );
 
 private:
 
@@ -70,4 +75,5 @@ private:
     QStringListModel* rootPathList_;    ///< The list with all root pathnames
 
     Workspace* workspaceRef_;           ///< A reference to the project
+    QString revealFileName_;            ///< The current filename that needs to be revealed (blank if none). This needs to be stored, because it can cause several 'events' before the reveal is succeeded
 };

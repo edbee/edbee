@@ -576,7 +576,7 @@ void MainWindow::updateTabName(int tabIndex)
 }
 
 
-/// The active tab has change
+/// The active tab has changed
 /// This requires the updating of the ui controls
 void MainWindow::activeTabChanged()
 {
@@ -600,6 +600,12 @@ void MainWindow::activeTabChanged()
         QString filename = widget->property("file").toString();
         setWindowFilePath(filename);
         setWindowTitle( filename.isEmpty() ? qApp->applicationDisplayName() : tr("%1 - %2").arg(filename).arg(qApp->applicationDisplayName()) );
+
+
+        // when autoreveal is enabled, reveal it in the sidebar
+        if( edbeeApp()->config()->autoReveal() && !filename.isEmpty() ) {
+            this->fileTreeSideWidgetRef_->reveal( filename );
+        }
     }
 
     updateStateEditorActions();
@@ -1128,7 +1134,6 @@ void MainWindow::constructMenu()
 
     // update the workspace menu items menu
     updateRecentWorkspaceMenuItems();
-
 }
 
 

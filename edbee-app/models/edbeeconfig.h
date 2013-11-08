@@ -44,6 +44,10 @@ public:
     QString file( int idx ) const;
     QString loadMessageForFile( int idx ) const;
 
+
+    // application specific configuration settings
+    bool autoReveal() const;
+
 private:
 
     QList<EdbeeConfigFileItem*> configFileItemList_;       ///< A list with all config file items

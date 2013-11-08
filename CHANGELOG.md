@@ -2,6 +2,7 @@
 
 edbee.app:
 
+- add #87, Add setting auto-reveal to keep the file tree-view in sync with active tab
 - add #83, Pressing Enter in the filemenu should open the file in the editor
 - add #64, Closing an active tab, puts the keyboard focus on the sidebar. Focus should stay in the editor
 - add #82, Add remove item option to sidebar file tree
@@ -10,7 +11,7 @@ edbee.app:
 - add #80, Add rename file support to the tree view
 - add #57, Show active file and icon in the titlebar 
 - add #27, Added file-changed check support when closing the window/application
-- add #42, Reveal in sidebar support added to context menu
+- add #42, #88, Reveal in sidebar support added to context menu
 - add #34, Switching tabs now can be done with a keyboard press
 - add #47, Recent workspace list for quick workspace switching
 - add #49, When closing the application the current workspace is saved w

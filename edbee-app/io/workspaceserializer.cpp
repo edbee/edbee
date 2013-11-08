@@ -265,6 +265,10 @@ void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantM
         win->setGeometry(x,y,width,height);
     }
 
+    // update the side tree (this needs to be first, so the correct root is selected)
+    win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
+
+
     // reopen all existing tabs
     QVariantList tabs = map.value("tabs").toList();
     int activeIndex = 0;
@@ -288,9 +292,6 @@ void WorkspaceSerializer::deserializeMainWindow(MainWindow* win, const QVariantM
 
     // now select the correct tab
     win->setActiveTabIndex(activeIndex);
-
-    // update the side tree
-    win->fileTreeSideWidget()->deserialize( map.value("sidebar").toMap() );
 
     // update the tab state
     win->activeTabChanged();    // makes the tab update the state

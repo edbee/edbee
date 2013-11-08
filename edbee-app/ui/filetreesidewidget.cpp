@@ -241,13 +241,47 @@ void FileTreeSideWidget::clearAllRootPaths()
 
 /// Reveals the given filename in the tree
 /// In other words this method selects the given file in the filetree (if it exsists)
-void FileTreeSideWidget::reveal(const QString& filename)
+///
+/// This method is very tricky. it tries to reveal the item immediately
+/// Problem is that it is possible the given iem hasn't been loaded yet. When it hasn't been loaded yet
+/// it loads the next direct and keeps revealing until the item is loaded
+///
+/// @param filename the filename to reveal
+/// @return true if the file was completed (revealed or not) or false if the file needs to be loaded
+///
+bool FileTreeSideWidget::reveal(const QString& filename)
 {
     QModelIndex idx = fileTreeModel_->index( filename );
+    revealFileName_ = filename;
+
+    // build the treePath
+    QList<QModelIndex> treePath;
+    treePath.append(idx);
+    QModelIndex treeIdx = idx;
+    while( treeIdx.isValid() ) {
+        treePath.prepend(treeIdx);
+        treeIdx= fileTreeModel_->parent(treeIdx);
+    }
+
+
+    // make sure the complete path has been loaded
+    foreach( QModelIndex treeIdx, treePath ) {
+        while( fileTreeModel_->canFetchMore(treeIdx) ) {
+            fileTreeModel_->fetchMore(treeIdx);
+            return false;
+        }
+    }
+
+    // clear the reveal filename
+    revealFileName_.clear();
+
+    // stil a valid index
     if( idx.isValid() ) {
         fileTreeRef_->setCurrentIndex( idx );
         fileTreeRef_->scrollTo(idx);
+        fileTreeRef_->expand(idx);
     }
+    return true;
 }
 
 
@@ -371,6 +405,16 @@ void FileTreeSideWidget::deleteItemByAction()
 }
 
 
+/// The directory has been loaded
+void FileTreeSideWidget::directoryLoaded(const QString& directory)
+{
+    // keep revealing until done :)
+    if( revealFileName_.startsWith(directory) ) {
+        reveal(revealFileName_);
+    }
+}
+
+
 /// Constructs the user interface
 void FileTreeSideWidget::constructUI()
 {
@@ -439,6 +483,7 @@ void FileTreeSideWidget::constructUI()
 /// Connects all signals
 void FileTreeSideWidget::connectSignals()
 {
+    connect( fileTreeModel_, SIGNAL(directoryLoaded(QString)), this, SLOT(directoryLoaded(QString)) );
     connect( fileTreeRef_, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(openFileItem(QModelIndex)) );
     connect( fileTreeRef_, SIGNAL(activated(QModelIndex)), this, SLOT(openFileItem(QModelIndex)) );
     connect( fileTreeRef_, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(fileTreeContextMenu(QPoint)) );
