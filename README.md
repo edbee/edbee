@@ -2,12 +2,9 @@ edbee
 =====
 
 Editor and C++ Editor Component for Qt. Multiple-carets, Textmate Grammar and Highlighting support.
-
 The main website for edbee is at http://edbee.net/
-
 You can find the generated documentation at http://docs.edbee.net/
-
-You can find the (highly experimental) binaries at https://bintray.com/gamecreature/edbee/edbee-app
+You can find the (highly experimental and outdated) binaries at https://bintray.com/gamecreature/edbee/edbee-app
 
 ![Screenshot of the example application](http://edbee.net/images/screenshot1.png)
 
@@ -77,6 +74,18 @@ widget->textDocument()->setLanguagGrammar( grammar );
 ```
 
 
+Project Directory Structure
+---------------------------
+At the moment this git repos, contains all code for both the editor as the editor component. 
+
+* edbee-app: is a standalone editor, which uses the edbee-lib component
+* edbee-lib: is the Qt component library
+* edbee-data: probably shouldn't be in this git repos. It contains some grammar files and themes from textmate/sublime
+* edbee-test: the testing project of the Qt Component library
+* edbee-app-test: a testing project of the edbee application (still very primitive)
+* vendor: contains the external vendor sources
+
+
 
 Known Issues and Missing Features
 ---------------------------------
@@ -84,7 +93,7 @@ Known Issues and Missing Features
 * The editor doesn't support word-wrapping. (yet)
 * It has issues with long lines. The cause of this is the nature of QTextLayout and the support of variable font sizes. In the future this can be fixed for monospaced fonts.
 * Optimalisations for better render support and background calculate/paint-ahead functionality
-* The example editor is still a very primitive editor. It needs a lot of improvements.
+* I really want to build in scripting support, for extending the editor with plugins. 
 
 
 Contributing
