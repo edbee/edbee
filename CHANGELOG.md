@@ -2,6 +2,7 @@
 
 edbee.app:
 
+- add #89, Implement smarter backspace for the start of the line
 - add #87, Add setting auto-reveal to keep the file tree-view in sync with active tab
 - add #83, Pressing Enter in the filemenu should open the file in the editor
 - add #64, Closing an active tab, puts the keyboard focus on the sidebar. Focus should stay in the editor
