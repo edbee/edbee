@@ -98,6 +98,7 @@ void EdbeeConfig::fillEditorConfig(edbee::TextEditorConfig* config) const
     config->setUseTabChar( map->boolValue( "use_tab", true ));
     QFont font( map->stringValue("font","Monospace"), map->intValue("font_size",12) );
     config->setScrollPastEnd( map->boolValue("scroll_past_end",false) );
+    config->setShowWhitespaceMode( map->stringValue("show_whitespace_mode","hide") );
     config->setFont(font);
     config->endChanges();
 }
