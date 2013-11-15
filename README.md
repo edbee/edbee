@@ -76,7 +76,7 @@ widget->textDocument()->setLanguagGrammar( grammar );
 
 Project Directory Structure
 ---------------------------
-At the moment this git repos, contains all code for both the editor as the editor component. 
+At the moment this git repo contains all code for both the editor and the component. 
 
 * edbee-app: is a standalone editor, which uses the edbee-lib component
 * edbee-lib: is the Qt component library
