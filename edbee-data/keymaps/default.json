@@ -53,9 +53,15 @@
 		{ "keys": "Return", "command": "ins_newline" },
         { "keys": "Shift+Enter", "command": "ins_newline" },
         { "keys": "Shift+Return", "command": "ins_newline" },
+
+        // deletion left
         { "keys": "Backspace", "command": "del_left" },
 		{ "keys": "Shift+Backspace", "command": "del_left" },
-		{ "keys": "Delete", "command": "del_right" },
+        { "keys": "Alt+Backspace", "command": "del_word_left" },
+        { "keys": "Ctrl+Backspace", "command": "del_line_left" },
+
+        // deletion right
+        { "keys": "Delete", "command": "del_right" },
         { "keys": "Shift+Delete", "command": "del_right" },
 
 		// tab entry

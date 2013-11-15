@@ -2,6 +2,8 @@
 
 edbee.app:
 
+- add #94, Command Backspace should delete everything to the start of the current line
+- add #91, Control Backspace should delete the current word
 - add #90, Add a config setting to to enable/disable the rendering of whitespaces
 - add #89, Implement smarter backspace for the start of the line
 - add #87, Add setting auto-reveal to keep the file tree-view in sync with active tab
