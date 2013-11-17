@@ -47,8 +47,7 @@
 		{ "keys": "Ctrl+Alt+Up", "command": "add_caret_prev_line" },
 		{ "keys": "Ctrl+Alt+Down", "command": "add_caret_next_line" },
 
-		
-		// line entry
+				// line entry
 		{ "keys": "Enter", "command": "ins_newline" },
 		{ "keys": "Return", "command": "ins_newline" },
         { "keys": "Shift+Enter", "command": "ins_newline" },
@@ -63,6 +62,8 @@
         // deletion right
         { "keys": "Delete", "command": "del_right" },
         { "keys": "Shift+Delete", "command": "del_right" },
+        { "keys": "Alt+Delete", "command": "del_word_right" },
+        { "keys": "Ctrl+Delete", "command": "del_line_right" },
 
 		// tab entry
 		{ "keys": "Tab", "command": "tab" },

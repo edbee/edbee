@@ -2,6 +2,8 @@
 
 edbee.app:
 
+- add #95, Command Delete should delete everything to the end of the current line
+- add #93, Control Delete should delete the current 'word'
 - add #94, Command Backspace should delete everything to the start of the current line
 - add #91, Control Backspace should delete the current word
 - add #90, Add a config setting to to enable/disable the rendering of whitespaces
