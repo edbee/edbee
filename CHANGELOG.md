@@ -2,10 +2,6 @@
 
 edbee.app:
 
-- add #95, Command Delete should delete everything to the end of the current line
-- add #93, Control Delete should delete the current 'word'
-- add #94, Command Backspace should delete everything to the start of the current line
-- add #91, Control Backspace should delete the current word
 - add #90, Add a config setting to to enable/disable the rendering of whitespaces
 - add #89, Implement smarter backspace for the start of the line
 - add #87, Add setting auto-reveal to keep the file tree-view in sync with active tab
@@ -34,6 +30,11 @@ edbee.app:
 
 edbee.lib:
 
+- add #96, Multiple Cut line operations should append the lines together and grow the clipboard
+- add #95, Command Delete should delete everything to the end of the current line
+- add #93, Control Delete should delete the current 'word'
+- add #94, Command Backspace should delete everything to the start of the current line
+- add #91, Control Backspace should delete the current word
 - add #85, Added scroll-past-end feature
 - add #78, Added language independent smart tab support (enabled by default)
 - add #79, Double clicking a selection with the control key again should remove the given selection and caret
