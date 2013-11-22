@@ -17,6 +17,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QPushButton>
 #include <QSplitter>
 #include <QStatusBar>
 
@@ -329,7 +330,23 @@ bool MainWindow::closeFileWithTabIndex(int idx)
             }
 
             // show the standard message
-            QMessageBox::StandardButton but = QMessageBox::question(this, tr("Save changes?"), msg, QMessageBox::Save|QMessageBox::Discard|QMessageBox::Cancel );
+            QMessageBox msgBox(this);
+            msgBox.setIcon( QMessageBox::Question );
+            msgBox.setWindowTitle(tr("Save Changes?"));
+            msgBox.setText(tr("Save Changes?"));
+            msgBox.setInformativeText(msg);
+
+            // add the save and cancel button
+            msgBox.addButton(QMessageBox::Save);
+            msgBox.addButton(QMessageBox::Cancel);
+
+            // and the discard button
+            QPushButton* discardButton =  msgBox.addButton(QMessageBox::Discard);
+            discardButton->setText(tr("&Discard"));
+            discardButton->setShortcut(QKeySequence("Ctrl+D"));
+            discardButton->setShortcutEnabled(true);
+
+            int but = msgBox.exec();
 
             // save options has been chosen
             if( but == QMessageBox::Save ) {
