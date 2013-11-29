@@ -30,6 +30,7 @@ edbee.app:
 
 edbee.lib:
 
+- add #41, Duplicate Line support (Cmd+Shift+D)
 - add #96, Multiple Cut line operations should append the lines together and grow the clipboard
 - add #95, Command Delete should delete everything to the end of the current line
 - add #93, Control Delete should delete the current 'word'
@@ -43,6 +44,7 @@ edbee.lib:
 - add #43, Added right-click context-menu support to edbee. With default operations, cut, copy, paste and select all.
 - add #36, Pressing shift-enter now inserts a newline
 - add #31, Textsearching now also works with other ranges then textselection ranges
+- fix #73, Complete rewrite of coalescing (change-merging) algorithm, so all textchanges are mergable. (Fixes #98,#97,#95,#41)
 - fix #86, Pressing left or right when a selection is active shouldn't move the caret (current behavior is not-standard)
 - fix #68, Adding a selection with Cmd+Mouse Double click shouldn't expand existing word selections
 - fix #77, Pressing end of line on the last line, sometimes goes to the wrong location
