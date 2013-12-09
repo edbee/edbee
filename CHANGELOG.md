@@ -22,6 +22,7 @@ edbee.app:
 - add #17, added a test-project to make the edbee app testable
 - add #13, json configuration support
 - add #44, clear history to file-root combobox in sidebar
+- fix #102, Mousewheel shouldn't switch edit window when used on tab bar
 - fix #54, Sort the grammar combobx alphabetically
 - fix #26, Support multiple windows, with the help of a window manager
 - fix #15, It now is possible to change to the font of the editor

@@ -17,6 +17,7 @@ class QTreeView;
 
 class Application;
 class FileTreeSideWidget;
+class TabWidget;
 class Workspace;
 
 
@@ -131,7 +132,7 @@ private:
 
 private:
     FileTreeSideWidget* fileTreeSideWidgetRef_;     ///< The side tree widget
-    QTabWidget* tabWidgetRef_;                      ///< A reference to the tab widget
+    TabWidget* tabWidgetRef_;                       ///< A reference to the tab widget
     QStatusBar* statusBarRef_;                      ///< The statusbar
     QComboBox* grammarComboRef_;                    ///< The grammar combobox
     QComboBox* lineEndingComboRef_;                 ///< The line-ending combobox

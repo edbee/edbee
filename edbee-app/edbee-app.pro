@@ -27,7 +27,8 @@ SOURCES +=\
     models/workspace.cpp \
     io/workspaceserializer.cpp \
     commands/revealinsidebarcommand.cpp \
-    util/fileutil.cpp
+    util/fileutil.cpp \
+    ui/tabwidget.cpp
 
 HEADERS  += \
     ui/mainwindow.h \
@@ -40,7 +41,8 @@ HEADERS  += \
     models/workspace.h \
     io/workspaceserializer.h \
     commands/revealinsidebarcommand.h \
-    util/fileutil.h
+    util/fileutil.h \
+    ui/tabwidget.h
 
 
 RESOURCES += \

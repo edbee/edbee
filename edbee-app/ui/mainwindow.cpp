@@ -43,6 +43,7 @@
 #include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
 #include "models/workspace.h"
+#include "ui/tabwidget.h"
 #include "ui/windowmanager.h"
 
 #include "debug.h"
@@ -1018,12 +1019,7 @@ void MainWindow::constructUI()
     QSplitter* splitter = new QSplitter(Qt::Horizontal);
 
     // create the tab widget
-    tabWidgetRef_ = new QTabWidget();
-    tabWidgetRef_->setTabsClosable(true);
-    tabWidgetRef_->setTabShape(QTabWidget::Triangular);
-    tabWidgetRef_->setDocumentMode(true);
-    tabWidgetRef_->setMovable(true);
-    tabWidgetRef_->setUsesScrollButtons(true);
+    tabWidgetRef_ = new TabWidget();
 
 
     // build the splitter
