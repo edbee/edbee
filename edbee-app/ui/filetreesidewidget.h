@@ -52,6 +52,9 @@ public slots:
     void createNewFolderAndRename( const QString& pathname );
     void createNewFolderAndRenameByAction();
 
+    void duplicateFileAndRename( const QString& pathname );
+    void duplicateFileAndRenameByAction();
+
     void deleteItem( const QString& pathname );
     void deleteItemByAction();
 

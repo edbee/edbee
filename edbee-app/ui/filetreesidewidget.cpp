@@ -161,6 +161,14 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
         connect( deleteAction, SIGNAL(triggered()), this, SLOT(deleteItemByAction()) );
         menu.addAction( deleteAction );
 
+        if( fileInfo.isFile() ) {
+            // add a duplicate action
+            QAction* duplicateAction = new QAction(tr("Duplicate"),&menu);
+            duplicateAction->setData( fileInfo.absoluteFilePath() );
+            connect( duplicateAction, SIGNAL(triggered()), this, SLOT(duplicateFileAndRenameByAction()) );
+            menu.addAction( duplicateAction );
+        }
+
         // when clicking on a directory add a create new file/folder options
         if( fileInfo.isDir() ) {
             // create new file aciton
@@ -362,6 +370,59 @@ void FileTreeSideWidget::createNewFolderAndRenameByAction()
     QAction* action = qobject_cast<QAction*>(sender());
     if( action ) {
         createNewFolderAndRename( action->data().toString() );
+    }
+}
+
+
+/// Duplicates the given file.  (It automaticly generates copy with a new unique filename)
+/// Directly after doing this a rename file is started
+/// @param pathname the original filename that needs duplication
+void FileTreeSideWidget::duplicateFileAndRename(const QString& pathname)
+{
+    if( !pathname.isEmpty() ) {
+        QFileInfo fileInfo(pathname);
+
+        // get he file components
+        QString path = fileInfo.path();
+        QString filename = fileInfo.baseName();
+        QString suffix = fileInfo.suffix();
+        QString pattern = "%1/%2-%3%4";
+
+        // when a hidden file is called (we append the number to the end
+        if( filename.isEmpty() ) {
+            pattern = "%1/%2%4-%3";
+        }
+        // make sure the suffix starts with a '.'
+        if( !suffix.isEmpty() ) {
+            suffix.prepend(".");
+        }
+
+        // TODO, support full directory structures. at the moment it copies a file :)
+
+        // find th enew filename
+        QFile file;
+        int nr = 1;
+        do
+        {
+            ++nr;
+            file.setFileName( QString(pattern).arg(path).arg(filename).arg(nr).arg(suffix));
+        }
+        while( file.exists() );
+
+        // now copy the file
+        if( QFile::copy( pathname, file.fileName() ) ) {
+            startRenameItem( file.fileName());
+        }
+    }
+}
+
+
+/// Duplicates a file with the given action
+void FileTreeSideWidget::duplicateFileAndRenameByAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        duplicateFileAndRename( action->data().toString() );
     }
 }
 
