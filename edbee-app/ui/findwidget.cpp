@@ -15,7 +15,7 @@
 #include <QLineEdit>
 
 #include "application.h"
-#include "edbee/models/changes/selectiontextchange.h"
+#include "edbee/models/changes/selectionchange.h"
 #include "edbee/models/textbuffer.h"
 #include "edbee/models/textdocument.h"
 #include "edbee/models/textsearcher.h"
