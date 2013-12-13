@@ -260,7 +260,7 @@ const char *Application::osNameString()
 {
 #ifdef Q_OS_MAC
     return "osx";
-#elif Q_OS_WIN32
+#elif defined(Q_OS_WIN)
     return "win";
 #else
     return "x11";
