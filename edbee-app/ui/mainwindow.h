@@ -79,6 +79,9 @@ public slots:
     void gotoPrevTab();
     void gotoFile( const QString& file );
 
+    void revealPathInOSFileBrowser( const QString& path );
+    void revealActiveFileOSFileBrowser();
+
     void encodingChanged();
     void lineEndingChanged();
     void grammarChanged();

@@ -45,6 +45,7 @@
 #include "models/workspace.h"
 #include "ui/tabwidget.h"
 #include "ui/windowmanager.h"
+#include "util/fileutil.h"
 
 #include "debug.h"
 
@@ -666,6 +667,24 @@ void MainWindow::gotoFile(const QString& file)
 }
 
 
+/// Reveals the given path in the OS filebrowser
+/// Currently this only works on the Mac and Windows. On *nix only the folder is opened
+/// @param
+void MainWindow::revealPathInOSFileBrowser(const QString& path)
+{
+    if( path.length() > 0 ) {
+        FileUtil().revealInOSFileBrowser(path);
+    }
+}
+
+/// Reveals the given path in the OS filebrowser
+/// The path needs to be supplied in the data member of QAction
+void MainWindow::revealActiveFileOSFileBrowser()
+{
+    revealPathInOSFileBrowser( tabFilename() );
+}
+
+
 /// This slot is called if the encoding is changed in the combo
 /// The encoding setting of the document is changed
 void MainWindow::encodingChanged()
@@ -837,23 +856,23 @@ void MainWindow::editorContextMenu()
 
         // create the menu
         QMenu* menu = new QMenu();
-        menu->addAction( controller->createAction( "cut", tr("Cut") ) );
-        menu->addAction( controller->createAction( "copy", tr("Copy") ) );
-        menu->addAction( controller->createAction( "paste", tr("Paste") ) );
+        menu->addAction( controller->createAction( "cut", tr("Cut"), QIcon(), menu ) );
+        menu->addAction( controller->createAction( "copy", tr("Copy"), QIcon(), menu ) );
+        menu->addAction( controller->createAction( "paste", tr("Paste"), QIcon(), menu ) );
         menu->addSeparator();
-        menu->addAction( controller->createAction( "sel_all", tr("Select All") ) );
+        menu->addAction( controller->createAction( "sel_all", tr("Select All"), QIcon(), menu ) );
 
         // is a file coupled to the curent editor add 'reveal in sidebar'
         if( !tabFilename().isEmpty() ) {
             menu->addSeparator();
-            menu->addAction( controller->createAction( "app.reveal-in-sidebar", tr("Reveal in sidebar") ) );
+            menu->addAction( controller->createAction( "app.reveal-in-sidebar", tr("Reveal in Sidebar"), QIcon(), menu ) );
+            menu->addAction( action("app.reveal-in-os"));
         }
 
         /// shows the contextmenu
         menu->exec( QCursor::pos() );
 
-        // cleaup the contextmenu
-        qDeleteAll( menu->actions() );
+        // delete the menu
         delete menu;
     }
 }
@@ -971,6 +990,13 @@ void MainWindow::constructActions()
     createAction( "file.close", tr("&Close File"), QKeySequence::Close, this, SLOT(closeFileWithTabIndex()) );
     createAction( "file.save", tr("&Save"), QKeySequence::Save, this, SLOT(saveFile()) );
     createAction( "file.save_as", tr("&Save As..."), QKeySequence::SaveAs, this, SLOT(saveFileAs()) );
+    QString reveal =  tr("Reveal in Filesystem");
+#ifdef Q_OS_MAC
+    reveal =  tr("Reveal in Finder");
+#elif defined(Q_OS_WIN)
+    reveal =  tr("Reveal in Explorer");
+#endif
+    createAction( "app.reveal-in-os", reveal, QKeySequence(), this, SLOT(revealActiveFileOSFileBrowser()) );
 
 
     createAction( "find.find", tr("&Find..."), QKeySequence::Find, this, SLOT(showFindWidget()));

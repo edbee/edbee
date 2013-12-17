@@ -58,6 +58,8 @@ public slots:
     void deleteItem( const QString& pathname );
     void deleteItemByAction();
 
+    void revealItemInOSByAction();
+
 
 protected slots:
 

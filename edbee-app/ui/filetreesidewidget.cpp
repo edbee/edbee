@@ -184,6 +184,18 @@ void FileTreeSideWidget::fileTreeContextMenu(const QPoint& point)
             menu.addAction( newFolderAction );
         }
 
+        // add a reveal action.
+        // Todo, 'dry' this, same construct is used in MainWindow class!
+        QString revealText =  tr("Reveal in Filesystem");
+#ifdef Q_OS_MAC
+        revealText =  tr("Reveal in Finder");
+#elif defined(Q_OS_WIN)
+        revealText =  tr("Reveal in Explorer");
+#endif
+        QAction* revealAction = new QAction(revealText, &menu);
+        revealAction->setData( fileInfo.absoluteFilePath() );
+        connect( revealAction, SIGNAL(triggered()), this, SLOT(revealItemInOSByAction()) );
+        menu.addAction( revealAction );
     }
 
 
@@ -462,6 +474,16 @@ void FileTreeSideWidget::deleteItemByAction()
     QAction* action = qobject_cast<QAction*>(sender());
     if( action ) {
         deleteItem( action->data().toString() );
+    }
+}
+
+
+/// This method reveals the given filetree item in OS File
+void FileTreeSideWidget::revealItemInOSByAction()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if( action ) {
+        FileUtil().revealInOSFileBrowser( action->data().toString() );
     }
 }
 

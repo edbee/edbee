@@ -14,4 +14,5 @@ public:
     FileUtil();
 
     QString generateNewFilename( const QString& path, const QString& pattern );
+    void revealInOSFileBrowser( const QString& path );
 };

@@ -5,7 +5,10 @@
 
 #include "fileutil.h"
 
+#include <QDesktopServices>
 #include <QFile>
+#include <QPRocess>
+#include <QUrl>
 
 #include "debug.h"
 
@@ -42,4 +45,44 @@ QString FileUtil::generateNewFilename(const QString& path, const QString& patter
         ++idx;
     }
     // unreachable
+}
+
+
+/// This method reveals the given path/file in the operating system file browser (Finder/Explorer)
+/// We need to implement a linux version for this
+/// There's no garantee this method will work, it just forks a process
+void FileUtil::revealInOSFileBrowser(const QString& path)
+{
+    QStringList args;
+    bool fallbackToOpenFolder = true;
+#ifdef Q_OS_MAC
+    args << "-e" << "tell application \"Finder\"";
+    args << "-e" << QString("reveal POSIX file \"%1\"").arg(path);
+    args << "-e" << "activate";
+    args << "-e" << "end tell";
+    fallbackToOpenFolder  = !QProcess::startDetached("osascript", args);
+
+#elif defined(Q_OS_WIN)
+    if (!QFileInfo(path).isDir()) {
+        args <<  QLatin1String("/select,");
+    }
+    args << QDir::toNativeSeparators( path );
+    fallbackToOpenFolder = !QProcess::startDetached("explorer", args);
+#endif
+
+    // when the open failed, simply open the folder of the given file
+    // this can be done with standard QDesktopSerivces unctionality
+    if( fallbackToOpenFolder ) {
+        QString folder;
+        QFileInfo fileInfo(path);
+        if( fileInfo.isDir() ) {
+            folder = path;
+        } else {
+            folder = fileInfo.path();
+        }
+        if( !folder.isEmpty() ) {
+            QDesktopServices::openUrl( QUrl::fromLocalFile(folder) );
+        }
+    }
+
 }
