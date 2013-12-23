@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <QFont>
 #include <QHeaderView>
+#include <QLabel>
 #include <QLayout>
 #include <QMenuBar>
 #include <QMessageBox>
@@ -43,6 +44,7 @@
 #include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
 #include "models/workspace.h"
+#include "models/workspacemanager.h"
 #include "ui/tabwidget.h"
 #include "ui/windowmanager.h"
 #include "util/fileutil.h"
@@ -157,10 +159,12 @@ FileTreeSideWidget* MainWindow::fileTreeSideWidget() const
 
 /// Sets the current workspace
 /// @param workspace the assign this window to
-void MainWindow::setWorkspace(Workspace* workpace)
+void MainWindow::setWorkspace(Workspace* workspace)
 {
-    workspaceRef_ = workpace;
-    fileTreeSideWidgetRef_->setWorkspace( workpace );
+    workspaceRef_ = workspace;
+    connect( workspace, &Workspace::nameChanged, this, &MainWindow::updateWindowTitle );
+    fileTreeSideWidgetRef_->setWorkspace( workspace );
+    updateWindowTitle();
 }
 
 
@@ -415,18 +419,15 @@ bool MainWindow::saveFileAs()
 /// At the moment it closes all other windows and files
 void MainWindow::newWorkspace()
 {
-    qApp->setQuitOnLastWindowClosed(false);    // disable auto application quit on closing last window
+    // get the managers
+    WorkspaceManager* workspaceManager = edbeeApp()->workspaceManager();
+    WindowManager* windowManager = edbeeApp()->windowManager();
 
-    // close the current workspace
-    edbeeApp()->closeWorkspace();
+    // create the workspace
+    Workspace* workspace = workspaceManager->createWorkspace();
+    MainWindow* window = windowManager->createWindow( workspace );
+    window->show();
 
-    // create a new workspace
-    Workspace* workspace = new Workspace();
-    edbeeApp()->giveWorkspace( workspace );
-    edbeeApp()->windowManager()->createAndShowWindowIfEmpty();  // make sure at least one window is available
-
-    // re-enable quit on close
-    qApp->setQuitOnLastWindowClosed(true);
 }
 
 
@@ -449,17 +450,10 @@ bool MainWindow::openWorkspace( const QString& fileName )
         return false;
     }
 
-    // close the current workspace
-    edbeeApp()->setQuitOnLastWindowClosed(false);
-    edbeeApp()->closeWorkspace();
-
     // create the widget and serialize the file
     WorkspaceSerializer serializer;
     serializer.loadWorkspace( fileName );
-
-    // make sure there's always a single window
-    edbeeApp()->windowManager()->createAndShowWindowIfEmpty();
-    edbeeApp()->setQuitOnLastWindowClosed(true);
+    edbeeApp()->workspaceManager()->addToRecentWorkspaceFilenameList( fileName );
 
     return true;
 }
@@ -511,6 +505,7 @@ bool MainWindow::saveWorkspace()
         QMessageBox::warning(this, tr("Error saving workspace"), tr("Error saving workspace %1:\n%2").arg(workspaceRef_->filename()).arg(serializer.errorMessage()) );
         return false;
     }
+    edbeeApp()->workspaceManager()->addToRecentWorkspaceFilenameList( workspaceRef_->filename() );
     return true;
 }
 
@@ -542,7 +537,6 @@ bool MainWindow::saveWorkspaceAs()
     if( saveWorkspace() ) {
 
         // add the new filename to the recent workspace filenamelist
-        edbeeApp()->addToRecentWorkspaceFilenameList( workspaceRef_->filename() );
         return true;
     }
     workspaceRef_->setFilename( oldFilename );
@@ -550,10 +544,32 @@ bool MainWindow::saveWorkspaceAs()
 }
 
 
+/// This method closes the active workspace
+void MainWindow::closeWorkspace()
+{
+    // when closing a workspace, first save the workspace state
+    if( !workspace()->filename().isEmpty() ) {
+        WorkspaceSerializer workspaceIO;
+        workspaceIO.saveWorkspace( workspace() );
+    }
+
+    // when there's only one workspace left open a new one
+    if( edbeeApp()->workspaceManager()->size() <= 1 ) {
+        newWorkspace();
+    }
+
+    // close all windows with the given workspace
+    edbeeApp()->windowManager()->closeAllForWorkspace( workspace() );
+
+    // close the workspace
+    edbeeApp()->workspaceManager()->closeWorkspace( workspace() );
+}
+
+
 /// opens a new window
 void MainWindow::windowNew()
 {
-    edbeeApp()->windowManager()->createWindow( edbeeApp()->workspace() )->show();
+    edbeeApp()->windowManager()->createWindow( edbeeApp()->workspaceManager()->activeWorkspace() )->show();
 }
 
 
@@ -618,8 +634,7 @@ void MainWindow::activeTabChanged()
         // set the filename in the window menu
         QString filename = widget->property("file").toString();
         setWindowFilePath(filename);
-        setWindowTitle( filename.isEmpty() ? qApp->applicationDisplayName() : tr("%1 - %2").arg(filename).arg(qApp->applicationDisplayName()) );
-
+        updateWindowTitle();
 
         // when autoreveal is enabled, reveal it in the sidebar
         if( edbeeApp()->config()->autoReveal() && !filename.isEmpty() ) {
@@ -827,7 +842,8 @@ void MainWindow::updateRecentWorkspaceMenuItems()
     recentItemsMenuRef_->clear();
 
     // add all recent files
-    QStringList recentList = edbeeApp()->recentWorkspaceFilenameList();
+    WorkspaceManager* workspaceManager = edbeeApp()->workspaceManager();
+    QStringList recentList = workspaceManager->recentWorkspaceFilenameList();
     foreach( QString filename, recentList ) {
         // create the action
         QAction* action = new QAction( filename, recentItemsMenuRef_ );
@@ -841,7 +857,7 @@ void MainWindow::updateRecentWorkspaceMenuItems()
     /// Add the clear recent workspace list action
     recentItemsMenuRef_->addSeparator();
     QAction* clearListAction = new QAction( tr("Clear List"), recentItemsMenuRef_);
-    connect( clearListAction, &QAction::triggered, edbeeApp(), &Application::clearRecentWorkspaceFilenameList );
+    connect( clearListAction, &QAction::triggered, workspaceManager, &WorkspaceManager::clearRecentWorkspaceFilenameList );
     recentItemsMenuRef_->addAction( clearListAction );
 }
 
@@ -875,6 +891,19 @@ void MainWindow::editorContextMenu()
         // delete the menu
         delete menu;
     }
+}
+
+
+/// Updates the window title with the correct name
+void MainWindow::updateWindowTitle()
+{
+    // set the filename in the window menu
+    QString filename = tabFilename();
+    setWindowFilePath(filename);
+    setWindowTitle( tr("%1 - %2")
+                    .arg( filename.isEmpty() ? tr("Untitled") : filename )
+                    .arg( workspace()->name().isEmpty() ? qApp->applicationDisplayName() : workspace()->name() )
+    );
 }
 
 
@@ -1009,6 +1038,7 @@ void MainWindow::constructActions()
     createAction( "workspace.open", tr("&Open Workspace..."), QKeySequence(), this, SLOT(openWorkspace()) );
     createAction( "workspace.save", tr("Save Workspace"), QKeySequence(), this, SLOT(saveWorkspace()) );
     createAction( "workspace.save_as", tr("&Save Workspace As..."), QKeySequence(), this, SLOT(saveWorkspaceAs()) );
+    createAction( "workspace.close", tr("&Close Workspace"), QKeySequence(), this, SLOT(closeWorkspace()));
 
     createAction("win.new", tr("&New Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_N ), this, SLOT(windowNew() ) );
     createAction("win.close", tr("&Close Window"), QKeySequence( Qt::CTRL + Qt::SHIFT + Qt::Key_W ), this, SLOT(windowClose() ) );
@@ -1047,9 +1077,10 @@ void MainWindow::constructUI()
     // create the tab widget
     tabWidgetRef_ = new TabWidget();
 
+    // build the side widgets
+    fileTreeSideWidgetRef_ = new FileTreeSideWidget();
 
     // build the splitter
-    fileTreeSideWidgetRef_ = new FileTreeSideWidget();
     splitter->addWidget(fileTreeSideWidgetRef_);
     splitter->addWidget(tabWidgetRef_);
     splitter->setStretchFactor(0,0);
@@ -1160,6 +1191,8 @@ void MainWindow::constructMenu()
     workspaceMenu->addSeparator();
     workspaceMenu->addAction( action("workspace.save") );
     workspaceMenu->addAction( action("workspace.save_as") );
+    workspaceMenu->addSeparator();
+    workspaceMenu->addAction( action("workspace.close") );
 
     // add the window menu items
     QMenu* windowMenu = menuBar()->addMenu(("&Window"));
@@ -1188,6 +1221,6 @@ void MainWindow::connectSignals()
 
     // tree menu actions
     connect( fileTreeSideWidgetRef_,SIGNAL(fileDoubleClicked(QString)), SLOT(gotoFile(QString)) );
-    connect( edbeeApp(), &Application::recentWorkspaceFilenameListChanged,  this, &MainWindow::updateRecentWorkspaceMenuItems );
+    connect( edbeeApp()->workspaceManager(), &WorkspaceManager::recentWorkspaceFilenameListChanged,  this, &MainWindow::updateRecentWorkspaceMenuItems );
 }
 

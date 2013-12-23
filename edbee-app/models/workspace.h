@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <QObject>
 #include <QString>
 
 class QStringListModel;
@@ -12,8 +13,9 @@ class QStringListModel;
 
 
 /// This class represents a single workspace
-class Workspace
+class Workspace : public QObject
 {
+Q_OBJECT
 
 public:
     static QString fileExtension();
@@ -29,8 +31,17 @@ public:
     void setFilename( const QString& filename );
     QString filename() const;
 
+    QString name() const;
+    void setName( const QString& name );
+
+signals:
+    /// this signal is emitted if the name of the workspace is changed
+    void nameChanged( const QString& newName );
+
+
 private:
 
     QString filename_;                      ///< The project filename
+    QString name_;                          ///< The workspace name
 };
 

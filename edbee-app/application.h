@@ -13,6 +13,7 @@ class EdbeeConfig;
 class QtAwesome;
 class WindowManager;
 class Workspace;
+class WorkspaceManager;
 
 
 /// The global application for the edbee editor
@@ -40,6 +41,7 @@ public:
 
     EdbeeConfig* config() const;
     WindowManager* windowManager() const;
+    WorkspaceManager* workspaceManager() const;
 
     // os specific items
     bool isOSX();
@@ -47,18 +49,7 @@ public:
     bool isWin();
     const char* osNameString();
 
-    Workspace* workspace() const;
-    void giveWorkspace( Workspace* workspace );
-    void closeWorkspace();
-    void addToRecentWorkspaceFilenameList( const QString& filename );
-    void setRecentWorkspaceFilenameList( const QStringList& filenameList );
-    QStringList recentWorkspaceFilenameList() const;
-    void clearRecentWorkspaceFilenameList();
-
-signals:
-    /// This signal is fired with the recentWorkspaceFilenameList is changed
-    void recentWorkspaceFilenameListChanged();
-
+    Workspace* activeWorkspace() const;
 
 protected:
     bool event(QEvent* event);
@@ -71,11 +62,9 @@ private:
     QString userDataPath_;          ///< The user configuration path
     QtAwesome* qtAwesome_;          ///< The QtAwesome IconFont instance
 
-    EdbeeConfig* config_;           ///< The main edbee configuration file
-    WindowManager* windowManager_;  ///< The window manager
-    Workspace* workspace_;          ///< The current workspace. At the moment only 1 workspace can be opened. In the future we might support multiple workspace
-
-    QStringList recentWorkspaceFilenameList_;  ///< The recent workspace filename list
+    EdbeeConfig* config_;                   ///< The main edbee configuration file
+    WindowManager* windowManager_;          ///< The window manager
+    WorkspaceManager* workspaceManager_;    ///< The workspace manager
 };
 
 

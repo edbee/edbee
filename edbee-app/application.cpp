@@ -17,9 +17,11 @@
 #include "edbee/io/tmlanguageparser.h"
 #include "edbee/models/texteditorcommandmap.h"
 #include "edbee/views/texttheme.h"
+#include "io/appstateserializer.h"
 #include "io/workspaceserializer.h"
 #include "models/edbeeconfig.h"
 #include "models/workspace.h"
+#include "models/workspacemanager.h"
 #include "QtAwesome.h"
 #include "ui/mainwindow.h"
 #include "ui/windowmanager.h"
@@ -34,11 +36,13 @@ Application::Application(int& argc, char** argv )
     : QApplication( argc, argv )
     , qtAwesome_(0)
     , config_(0)
-    , workspace_(0)
 {
     config_ = new EdbeeConfig();
     windowManager_ = new WindowManager();
-    workspace_ = new Workspace();
+    workspaceManager_ = new WorkspaceManager();
+
+
+
 //    connect( this, &Application::aboutToQuit, this, &Application::shutdown );
 }
 
@@ -46,7 +50,7 @@ Application::Application(int& argc, char** argv )
 /// destruct the 'owned' objects
 Application::~Application()
 {
-    delete workspace_;
+    delete workspaceManager_;
     delete windowManager_;
     delete config_;
     delete qtAwesome_;
@@ -112,8 +116,12 @@ void Application::initApplication()
     // restore the last state
     loadState();
 
-    // Make sure there's always a window open
-    windowManager()->createAndShowWindowIfEmpty();
+    // when there's no active session, just start a blank one
+    if( workspaceManager()->size() == 0 ) {
+        Workspace* workspace = workspaceManager()->createWorkspace();
+        MainWindow* window = windowManager()->createWindow(workspace);
+        window->show();
+    }
 }
 
 
@@ -127,7 +135,7 @@ void Application::shutdown()
 /// Loads the last state of the application
 void Application::loadState()
 {
-    WorkspaceSerializer io;
+    AppStateSerializer io;
     if( !io.loadState(lastSessionFilename()) ) {
         qlog_warn() << "Error restoring session state to " << lastSessionFilename();
     }
@@ -139,15 +147,22 @@ void Application::loadState()
 void Application::saveState()
 {
     // serialize the previous state.
-    WorkspaceSerializer io;
-    if( !io.saveState(lastSessionFilename()) ) {
-        qlog_warn() << "Error saving session state to " << lastSessionFilename() << ": " << io.errorMessage();
+    AppStateSerializer appIO;
+    if( !appIO.saveState(lastSessionFilename()) ) {
+        qlog_warn() << "Error saving session state to " << lastSessionFilename() << ": " << appIO.errorMessage();
     }
 
     // when there's a filename in the workspace state. Also save that filename
-    if( !workspace()->filename().isEmpty() ) {
-        if( !io.saveWorkspace( workspace() ) ) {
-            qlog_warn() << "Error saving workspace " << workspace()->filename() << ": " << io.errorMessage();
+    WorkspaceManager* workspaceManager = edbeeApp()->workspaceManager();
+    for( int i=0,cnt=workspaceManager->size(); i<cnt; ++i ) {
+
+        // save every workspace
+        WorkspaceSerializer workspaceIO;
+        Workspace* workspace = workspaceManager->workspace(i);
+        if( !workspace->filename().isEmpty() ) {
+            if( !workspaceIO.saveWorkspace( workspace) ) {
+                qlog_warn() << "Error saving workspace " << workspace->filename() << ": " << workspaceIO.errorMessage();
+            }
         }
     }
 }
@@ -219,6 +234,13 @@ WindowManager* Application::windowManager() const
 }
 
 
+/// Returns the workspace manager
+WorkspaceManager* Application::workspaceManager() const
+{
+    return workspaceManager_;
+}
+
+
 /// This method returnst true if we're running on Mac OS X
 /// Note: I could have used macro's but that will probably litter the application with #ifdefs
 /// the current approach is much more flexible.
@@ -269,101 +291,12 @@ const char *Application::osNameString()
 }
 
 
-/// This method returns the current workspace
-Workspace* Application::workspace() const
+/// Returns the active workspace
+/// @return the current active workspace
+Workspace* Application::activeWorkspace() const
 {
-    return workspace_;
+    return workspaceManager()->activeWorkspace();
 }
-
-
-/// Gives the workspace to the application
-/// replacing the other workspace
-/// @param workspace the new workspace to use
-void Application::giveWorkspace(Workspace* workspace)
-{
-    // has the workspace been changed
-    if( workspace != workspace_ ) {
-        delete workspace_;
-        workspace_ = workspace;
-
-    // assigning the same workspace again is a design flaw!
-    } else {
-        qlog_warn() << "Hmm.. assigning the same workspace again !!";
-        Q_ASSERT(false);
-    }
-
-    // when adding a workspace with a filename add the workspace to the recent workspace list
-    if( !workspace->filename().isEmpty() ) {
-        this->addToRecentWorkspaceFilenameList( workspace->filename() );
-    }
-}
-
-
-/// Closes the current workspace
-/// This does NOT destroy the current workspace
-void Application::closeWorkspace()
-{
-    windowManager()->closeAllForWorkspace( workspace_ );
-    // notify the list has changed
-    emit recentWorkspaceFilenameListChanged();
-}
-
-
-/// Adds the given filename to the recent workspace filename list
-/// @param filename the filename to add to the list
-void Application::addToRecentWorkspaceFilenameList(const QString& filename)
-{
-    recentWorkspaceFilenameList_.removeOne( filename );
-    recentWorkspaceFilenameList_.push_front( filename );
-    // notify the list has changed
-    emit recentWorkspaceFilenameListChanged();
-}
-
-
-/// changes the recent workspace filename list to the given stringlist
-/// @param filenameList the list of new filename
-void Application::setRecentWorkspaceFilenameList(const QStringList& filenameList)
-{
-    recentWorkspaceFilenameList_ = filenameList;
-    emit recentWorkspaceFilenameListChanged();
-}
-
-
-/// Returns the list with all recent opened workspaces
-QStringList Application::recentWorkspaceFilenameList() const
-{
-    return recentWorkspaceFilenameList_;
-}
-
-
-/// clears the recent workspace filename list
-void Application::clearRecentWorkspaceFilenameList()
-{
-    recentWorkspaceFilenameList_.clear();
-    // notify the list has changed
-    emit recentWorkspaceFilenameListChanged();
-}
-
-
-/*
-/// Sets the current workspace
-bool Application::giveAndSwitchWorkspace(Workspace* workspace)
-{
-    qApp->setQuitOnLastWindowClosed(false);
-    // close the active workpace
-    if( workspace_ ) {
-        if( !windowManager()->closeAllForWorkspace( workspace_ )) {
-            qApp->setQuitOnLastWindowClosed(true);
-            return false;
-        }
-        delete workspace_;
-    }
-    // set the new workspace
-    workspace_ = workspace;
-    qApp->setQuitOnLastWindowClosed(true);
-    return true;
-}
-*/
 
 
 /// This is the place where all (application) events pass by

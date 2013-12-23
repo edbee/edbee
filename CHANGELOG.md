@@ -2,6 +2,7 @@
 
 edbee.app:
 
+- add #105, Improved workspace support so multiple workspaces can be open at one time
 - add #104, Add reveal in finder/explorer functionality
 - add #63, Add duplicate file to the sidebar
 - add #90, Add a config setting to to enable/disable the rendering of whitespaces

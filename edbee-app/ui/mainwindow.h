@@ -12,6 +12,7 @@
 
 class QComboBox;
 class QFileSystemModel;
+class QLabel;
 class QModelIndex;
 class QTreeView;
 
@@ -44,7 +45,7 @@ public:
 
     FileTreeSideWidget* fileTreeSideWidget() const;
 
-    void setWorkspace(Workspace* workpace );
+    void setWorkspace(Workspace* workspace );
     Workspace* workspace() const;
 
     bool isModified() const;
@@ -67,6 +68,7 @@ public slots:
     bool openWorkspace();
     bool saveWorkspace();
     bool saveWorkspaceAs();
+    void closeWorkspace();
 
     void windowNew();
     void windowClose();
@@ -97,8 +99,8 @@ protected slots:
     void updateActions();
     void updateRecentWorkspaceMenuItems();
 
-
     void editorContextMenu();
+    void updateWindowTitle();
 
 //    void onPaste();
 //    void onCopy();

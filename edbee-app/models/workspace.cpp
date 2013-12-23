@@ -28,6 +28,7 @@ QString Workspace::fileDialogFilter()
 
 /// Constructs a blank project
 Workspace::Workspace()
+    : QObject(0)
 {
 }
 
@@ -35,6 +36,7 @@ Workspace::Workspace()
 /// Copies the new project
 /// @param project the project to copy
 Workspace::Workspace(const Workspace& workspace )
+    : QObject(0)
 {
     copyFrom( workspace );
 }
@@ -43,6 +45,7 @@ Workspace::Workspace(const Workspace& workspace )
 /// A copy constructor with a pointer
 /// @param project the project pointer. When this pointer is 0 the default constructor is used
 Workspace::Workspace(const Workspace* workspace )
+    : QObject(0)
 {
     if( workspace ) {
         copyFrom( *workspace );
@@ -71,6 +74,9 @@ void Workspace::setFilename( const QString& filename )
     if( !filename_.endsWith(fileExtension() ) ) {
         filename_ += fileExtension();
     }
+
+    // currently the name is set to the basename of the project
+    name_ = QFileInfo(filename).baseName();
 }
 
 
@@ -78,5 +84,23 @@ void Workspace::setFilename( const QString& filename )
 QString Workspace::filename() const
 {
     return filename_;
+}
+
+
+/// returns the name of this workspace
+QString Workspace::name() const
+{
+    return name_;
+}
+
+
+/// set the name of the project
+void Workspace::setName(const QString& name)
+{
+    bool equal = name == name_;
+    name_ = name;
+    if( !equal ) {
+        emit nameChanged(name_);
+    }
 }
 

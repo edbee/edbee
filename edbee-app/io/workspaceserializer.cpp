@@ -21,6 +21,7 @@
 #include "edbee/views/textselection.h"
 
 #include "models/workspace.h"
+#include "models/workspacemanager.h"
 #include "ui/mainwindow.h"
 #include "ui/filetreesidewidget.h"
 #include "ui/windowmanager.h"
@@ -42,82 +43,16 @@ WorkspaceSerializer::~WorkspaceSerializer()
 }
 
 
-/// Saves the current state to the given file
-/// @param fileName the filename to store the state
-/// @return true on success
-bool WorkspaceSerializer::saveState(const QString& fileName)
-{
-    errorMessage_.clear();
-
-    // open the device
-    QFile file( fileName);
-    if( !file.open( QIODevice::WriteOnly) ) {
-        errorMessage_ = file.errorString();
-        return false;
-    }
-
-    // serialize the complete copy of the current workspace (and the filename to open thisw workspace)
-    QVariantMap data;
-    data.insert("workspace", serializeWorkspace( edbeeApp()->workspace() ) );
-    data.insert("workspace-file", edbeeApp()->workspace()->filename() );
-    data.insert("recent-workspaces", edbeeApp()->recentWorkspaceFilenameList() );
-
-    // serialize the data (into a json document)
-    QJsonDocument doc;
-    doc.setObject( QJsonObject::fromVariantMap( data ) );
-
-    // write the docuemnt
-    file.write( doc.toJson() );
-    file.close();
-    return true;
-}
-
-
-/// Loads the current state from the given file
-/// @param fileName the filename to load the state from
-/// @return true on success
-bool WorkspaceSerializer::loadState(const QString& fileName)
-{
-    errorMessage_.clear();
-
-    // serialize the data (into a json document)
-    edbee::JsonParser parser;
-    if( !parser.parse(fileName) ) {
-        errorMessage_ = parser.errorMessage();
-        return false;
-    }
-
-    // When the last opened workspace file exists re-open it
-    // and don't use the workspace data available in the last session file
-    QVariantMap map = parser.result().toMap();
-    QString workspaceFile = map.value("workspace-file").toString();
-    if( !workspaceFile.isEmpty() && QFile::exists( workspaceFile ) ) {
-        loadWorkspace( workspaceFile );
-    // else we restore the workspace stored in the last session
-    } else {
-        deserializeWorkspace( edbeeApp()->workspace(), map.value("workspace").toMap() );
-    }
-
-    // deserialize the recent workspace file list
-    QStringList recentList = map.value("recent-workspaces").toStringList();
-    if( !recentList.isEmpty() ) {
-        edbeeApp()->setRecentWorkspaceFilenameList( recentList );
-    }
-
-    return true;
-}
-
-
-/// Saves the project
+/// Saves the workspace
 /// A project is almost identical to the session state so saving the project here
 /// seems to be ok for the moment
-/// @param fileName the filename to save the project
-bool WorkspaceSerializer::saveWorkspace( Workspace* project )
+/// @param workspace the workspace to save
+bool WorkspaceSerializer::saveWorkspace( Workspace* workspace )
 {
     errorMessage_.clear();
 
     // open the device
-    QFile file( project->filename() );
+    QFile file( workspace->filename() );
     if( !file.open( QIODevice::WriteOnly) ) {
         errorMessage_ = file.errorString();
         return false;
@@ -126,7 +61,7 @@ bool WorkspaceSerializer::saveWorkspace( Workspace* project )
     // serialize the data
     // serialize the data (into a json document)
     QJsonDocument doc;
-    QVariantMap data = serializeWorkspace( edbeeApp()->workspace() );
+    QVariantMap data = serializeWorkspace( workspace );
     doc.setObject( QJsonObject::fromVariantMap( data ) );
 
     // write the docuemnt
@@ -154,15 +89,13 @@ Workspace* WorkspaceSerializer::loadWorkspace( const QString& fileName )
 
 
     // change the application workspace
-    Workspace* result = new Workspace();
+    Workspace* result = edbeeApp()->workspaceManager()->createWorkspace();
     result->setFilename( fileName );            // this need to be set before giving it to the workspace
-    edbeeApp()->giveWorkspace( result );
 
     // load the data into the workspace
     // Unfortunately the current implementation depends on the window being available.
     // so the deserialization needs to take place after giving it to the application
     deserializeWorkspace( result, map );
-
     return result;
 }
 
@@ -183,7 +116,7 @@ QVariantMap WorkspaceSerializer::serializeWorkspace(Workspace* workspace)
     // 'remember' all open files per window
     QVariantList windowList;
     WindowManager* wm = edbeeApp()->windowManager();
-    for( int i=0,cnt=wm->windowCount(); i<cnt; ++i ) {
+    for( int i=0,cnt=wm->size(); i<cnt; ++i ) {
         MainWindow* window = wm->window(i);
         if( window->workspace() == workspace ) {
             windowList.append( serializeMainWindow( window ));
@@ -207,6 +140,12 @@ void WorkspaceSerializer::deserializeWorkspace(Workspace* workspace, const QVari
         MainWindow* win = winManager->createWindow( workspace );
         deserializeMainWindow( win, winMap );
         win->show();
+    }
+
+    // when there are no windows, make sure there's at least one for this workspace
+    if( windows.size() == 0 ) {
+        MainWindow* window = edbeeApp()->windowManager()->createWindow( workspace );
+        window->show();
     }
 }
 

@@ -6,6 +6,7 @@
 #include "windowmanager.h"
 
 #include "application.h"
+#include "models/workspacemanager.h"
 #include "ui/mainwindow.h"
 
 #include "debug.h"
@@ -35,15 +36,6 @@ MainWindow* WindowManager::createWindow( Workspace* workspace )
 }
 
 
-/// this method creates and shows a mainwindow if no windows are available
-void WindowManager::createAndShowWindowIfEmpty()
-{
-    if( windowList_.isEmpty() ) {
-        createWindow( edbeeApp()->workspace() )->show();
-    }
-}
-
-
 /// Retuns the current active window
 /// @return the active window or 0 if no window is active
 MainWindow* WindowManager::activeWindow() const
@@ -53,7 +45,7 @@ MainWindow* WindowManager::activeWindow() const
 
 
 /// retursn the number of active windows
-int WindowManager::windowCount() const
+int WindowManager::size() const
 {
     return windowList_.size();
 }
@@ -64,15 +56,30 @@ int WindowManager::windowCount() const
 /// @return the mainwindow at the given index
 MainWindow* WindowManager::window(int idx) const
 {
-    Q_ASSERT(idx<windowCount());
+    Q_ASSERT(idx<size());
     return windowList_.at(idx);
+}
+
+
+/// Returns a list with all windows for the given workspace
+/// @param workspace the workspace to list all windows for
+/// @return a list with all windows for the given workspace
+QList<MainWindow*> WindowManager::windowsForWorkspace( Workspace* workspace ) const
+{
+    QList<MainWindow*> result;
+    foreach( MainWindow* window, windowList_ ) {
+        if( window->workspace() == workspace) {
+            result.append(window);
+        }
+    }
+    return result;
 }
 
 
 /// Closes all windows for the given workspace
 /// @param workspace the workspace to close all windows for
 /// @return true if all workspace windows have been closed. False if a window canceled the close operation
-bool WindowManager::closeAllForWorkspace(Workspace* workspace)
+void WindowManager::closeAllForWorkspace(Workspace* workspace)
 {
     // clear the list
     for( int i=windowList_.size()-1; i>=0; --i ) {
@@ -80,10 +87,9 @@ bool WindowManager::closeAllForWorkspace(Workspace* workspace)
 
         // only close window if it from the same workspace
         if( win->workspace() == workspace ) {
-            if( !win->close() ) { return false; }
+            win->close();
         }
     }
-    return true;
 }
 
 
@@ -104,8 +110,16 @@ bool WindowManager::closeAll()
 void WindowManager::windowClosed()
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>( sender() );
-    if( mainWindow ) {
+    if( mainWindow ) {       
         windowList_.removeOne(mainWindow);
+
+        // when the last awindow is closed, close the workspace
+        QList<MainWindow*> windows = windowsForWorkspace( mainWindow->workspace() );
+        if( windows.size() == 1 && windows.at(0) == mainWindow) {
+            edbeeApp()->workspaceManager()->closeWorkspace( mainWindow->workspace() );
+        }
+
+        // delete this window
         mainWindow->deleteLater();
     } else {
         qlog_warn() << "Recieved a windowClosed event from a non-window?!";

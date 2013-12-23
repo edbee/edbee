@@ -30,18 +30,16 @@ public:
     WorkspaceSerializer();
     virtual ~WorkspaceSerializer();
 
-    bool saveState( const QString& fileName );
-    bool loadState( const QString& fileName );
-
-    bool saveWorkspace( Workspace* project );
+    bool saveWorkspace(Workspace* workspace );
     Workspace* loadWorkspace( const QString& fileName );
 
     QString errorMessage() const;
 
-protected:
+public:
     QVariantMap serializeWorkspace( Workspace* workspace );
     void deserializeWorkspace( Workspace* workspace, const QVariantMap& map);
 
+protected:
     QVariantMap serializeMainWindow( MainWindow* win );
     void deserializeMainWindow( MainWindow* win, const QVariantMap& map);
 

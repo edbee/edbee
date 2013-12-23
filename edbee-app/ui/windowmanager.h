@@ -19,13 +19,15 @@ public:
     virtual ~WindowManager();
 
     MainWindow* createWindow(Workspace* workspace);
-    void createAndShowWindowIfEmpty();
     MainWindow* activeWindow() const;
 
-    int windowCount() const;
+    int size() const;
     MainWindow* window( int idx ) const;
+    QList<MainWindow*> windowsForWorkspace( Workspace* workspace ) const;
 
-    bool closeAllForWorkspace( Workspace* workspace );
+public slots:
+
+    void closeAllForWorkspace( Workspace* workspace );
     bool closeAll();
 
 protected slots:
@@ -33,6 +35,5 @@ protected slots:
     void windowClosed();
 
 private:
-    QList<MainWindow*> windowList_;     ///< the list of active windows
-    
+    QList<MainWindow*> windowList_;     ///< the list of active windows    
 };
