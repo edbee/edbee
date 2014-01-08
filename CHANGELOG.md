@@ -34,7 +34,8 @@ edbee.app:
 
 edbee.lib:
 
-- add #33, Toggle comment line support. (Currently very basic, hardcoded c-style, need scoping support and block comments)
+- add #107, Implemented scoped/unscoped environment variable support
+- add #33, Toggle comment line support. (Currently very basic, hardcoded, support block comments)
 - add #41, Duplicate Line support (Cmd+Shift+D)
 - add #96, Multiple Cut line operations should append the lines together and grow the clipboard
 - add #95, Command Delete should delete everything to the end of the current line
