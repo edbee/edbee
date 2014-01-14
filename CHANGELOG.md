@@ -34,6 +34,7 @@ edbee.app:
 
 edbee.lib:
 
+- add #108, Added a DynamicTextRangeSet, a change aware rangeset, that automatically gets adjusted when the document changes.
 - add #107, Implemented scoped/unscoped environment variable support
 - add #33, Toggle comment line support. (Currently very basic, hardcoded, support block comments)
 - add #41, Duplicate Line support (Cmd+Shift+D)
