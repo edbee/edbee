@@ -77,6 +77,7 @@
         // special entry
         { "keys": "Ctrl+Shift+D", "command": "duplicate" },
         { "keys": "Ctrl+/", "command": "toggle_comment" },
+        { "keys": "Ctrl+Meta+/", "command": "toggle_block_comment" },
 
 		/// TODO: add a backtab action here
 		//set( QKeySequence( Qt::Key_BackTab ), new )
